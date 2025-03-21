@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 
 namespace Backend.Models
@@ -8,13 +9,22 @@ namespace Backend.Models
         [Key]
         public int IdSala { get; set; }
 
-        public string Nome { get; set; }
+        public string Nome { get; set; } = string.Empty;
 
         public int Lugares { get; set; }
 
-        public string TipoSala { get; set; }
+        public string TipoSala { get; set; } = string.Empty;
 
-        public string  Localizacao { get; set; }
+        public string  Localizacao { get; set; } = string.Empty;
 
+        // FK para referenciar a escola à qual a sala pertence
+        [ForeignKey(nameof(Escola))]
+        public int EscolaFK { get; set; }
+        public Escola? Escola { get; set; }
+
+        /// <summary>
+        /// Lista dos blocos de horário associados a esta sala
+        /// </summary>
+        public ICollection<BlocoHorario> BlocosHorario { get; set; } = new List<BlocoHorario>();
     }
 }

@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Backend.Models
 {
     public class BlocoHorario
     {
-
+        [Key]
         public int IdBloco { get; set; }
 
         public TimeSpan HoraInicio { get; set; }

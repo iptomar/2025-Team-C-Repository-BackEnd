@@ -1,0 +1,70 @@
+﻿@using Backend.Models
+@model BlocoHorario
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>BlocoHorario</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="IdBloco" />
+            <div class="form-group">
+                <label asp-for="HoraInicio" class="control-label"></label>
+                <input asp-for="HoraInicio" class="form-control" />
+                <span asp-validation-for="HoraInicio" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="HoraFim" class="control-label"></label>
+                <input asp-for="HoraFim" class="form-control" />
+                <span asp-validation-for="HoraFim" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DiaSemana" class="control-label"></label>
+                <select asp-for="DiaSemana" class="form-control"></select>
+                <span asp-validation-for="DiaSemana" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProfessorFK" class="control-label"></label>
+                <select asp-for="ProfessorFK" class="form-control" asp-items="ViewBag.ProfessorFK"></select>
+                <span asp-validation-for="ProfessorFK" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DisciplinaFK" class="control-label"></label>
+                <select asp-for="DisciplinaFK" class="form-control" asp-items="ViewBag.DisciplinaFK"></select>
+                <span asp-validation-for="DisciplinaFK" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SalaFK" class="control-label"></label>
+                <select asp-for="SalaFK" class="form-control" asp-items="ViewBag.SalaFK"></select>
+                <span asp-validation-for="SalaFK" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TurmaFK" class="control-label"></label>
+                <select asp-for="TurmaFK" class="form-control" asp-items="ViewBag.TurmaFK"></select>
+                <span asp-validation-for="TurmaFK" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TipologiaFK" class="control-label"></label>
+                <select asp-for="TipologiaFK" class="form-control" asp-items="ViewBag.TipologiaFK"></select>
+                <span asp-validation-for="TipologiaFK" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

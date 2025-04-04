@@ -15,6 +15,8 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // Identity
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    // Adiciona suporte a roles
+    .AddRoles<IdentityRole>() 
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 // Autenticação JWT, configuração:
@@ -59,5 +61,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
+
+await DbInitializer.SeedAsync(app.Services);
 
 app.Run();

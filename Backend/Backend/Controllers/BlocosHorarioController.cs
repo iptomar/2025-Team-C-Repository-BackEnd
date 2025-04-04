@@ -52,11 +52,11 @@ namespace Backend.Controllers
         // GET: BlocosHorario/Create
         public IActionResult Create()
         {
-            ViewData["DisciplinaFK"] = new SelectList(_context.UCs, "IdDisciplina", "IdDisciplina");
-            ViewData["ProfessorFK"] = new SelectList(_context.Utilizadores, "IdUtilizador", "IdUtilizador");
-            ViewData["SalaFK"] = new SelectList(_context.Salas, "IdSala", "IdSala");
-            ViewData["TipologiaFK"] = new SelectList(_context.UCs, "IdDisciplina", "IdDisciplina");
-            ViewData["TurmaFK"] = new SelectList(_context.Turmas, "IdTurma", "IdTurma");
+            ViewData["DisciplinaFK"] = new SelectList(_context.UCs, "IdDisciplina", "NomeDisciplina");
+            ViewData["ProfessorFK"] = new SelectList(_context.Utilizadores, "IdUtilizador", "Nome");
+            ViewData["SalaFK"] = new SelectList(_context.Salas, "IdSala", "Nome");
+            ViewData["TipologiaFK"] = new SelectList(_context.UCs, "IdDisciplina", "IdDisciplina"); // TO-DO: ver o que este retorna
+            ViewData["TurmaFK"] = new SelectList(_context.Turmas, "IdTurma", "Nome");
             return View();
         }
 
@@ -94,11 +94,11 @@ namespace Backend.Controllers
             {
                 return NotFound();
             }
-            ViewData["DisciplinaFK"] = new SelectList(_context.UCs, "IdDisciplina", "IdDisciplina", blocoHorario.DisciplinaFK);
-            ViewData["ProfessorFK"] = new SelectList(_context.Utilizadores, "IdUtilizador", "IdUtilizador", blocoHorario.ProfessorFK);
-            ViewData["SalaFK"] = new SelectList(_context.Salas, "IdSala", "IdSala", blocoHorario.SalaFK);
-            ViewData["TipologiaFK"] = new SelectList(_context.UCs, "IdDisciplina", "IdDisciplina", blocoHorario.TipologiaFK);
-            ViewData["TurmaFK"] = new SelectList(_context.Turmas, "IdTurma", "IdTurma", blocoHorario.TurmaFK);
+            ViewData["DisciplinaFK"] = new SelectList(_context.UCs, "IdDisciplina", "NomeDisciplina", blocoHorario.DisciplinaFK);
+            ViewData["ProfessorFK"] = new SelectList(_context.Utilizadores, "IdUtilizador", "Nome", blocoHorario.ProfessorFK);
+            ViewData["SalaFK"] = new SelectList(_context.Salas, "IdSala", "Nome", blocoHorario.SalaFK);
+            ViewData["TipologiaFK"] = new SelectList(_context.UCs, "IdDisciplina", "Tipologia", blocoHorario.TipologiaFK);
+            ViewData["TurmaFK"] = new SelectList(_context.Turmas, "IdTurma", "Nome", blocoHorario.TurmaFK);
             return View(blocoHorario);
         }
 
@@ -134,11 +134,11 @@ namespace Backend.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["DisciplinaFK"] = new SelectList(_context.UCs, "IdDisciplina", "IdDisciplina", blocoHorario.DisciplinaFK);
-            ViewData["ProfessorFK"] = new SelectList(_context.Utilizadores, "IdUtilizador", "IdUtilizador", blocoHorario.ProfessorFK);
-            ViewData["SalaFK"] = new SelectList(_context.Salas, "IdSala", "IdSala", blocoHorario.SalaFK);
-            ViewData["TipologiaFK"] = new SelectList(_context.UCs, "IdDisciplina", "IdDisciplina", blocoHorario.TipologiaFK);
-            ViewData["TurmaFK"] = new SelectList(_context.Turmas, "IdTurma", "IdTurma", blocoHorario.TurmaFK);
+            ViewData["DisciplinaFK"] = new SelectList(_context.UCs, "IdDisciplina", "NomeDisciplina", blocoHorario.DisciplinaFK);
+            ViewData["ProfessorFK"] = new SelectList(_context.Utilizadores, "IdUtilizador", "Nome", blocoHorario.ProfessorFK);
+            ViewData["SalaFK"] = new SelectList(_context.Salas, "IdSala", "Nome", blocoHorario.SalaFK);
+            ViewData["TipologiaFK"] = new SelectList(_context.UCs, "IdDisciplina", "Tipologia", blocoHorario.TipologiaFK);
+            ViewData["TurmaFK"] = new SelectList(_context.Turmas, "IdTurma", "Nome", blocoHorario.TurmaFK);
             return View(blocoHorario);
         }
 

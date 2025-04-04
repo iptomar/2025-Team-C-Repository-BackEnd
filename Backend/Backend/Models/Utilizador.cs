@@ -36,5 +36,10 @@ namespace Backend.Models
         /// Lista dos blocos de horário associados (caso seja docente)
         /// </summary>
         public ICollection<BlocoHorario> BlocosHorario { get; set; }
+
+        /// <summary>
+        /// Atributo para fazer a ligação entre a base de dados "da aplicação" e a base de dados (default) do Identity
+        /// </summary>
+        public string UserId { get; set; }
     }
 }

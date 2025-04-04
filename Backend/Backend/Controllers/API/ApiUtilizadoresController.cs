@@ -51,7 +51,7 @@ namespace Backend.Controllers.API
 
         [HttpPost]
         [Route("createUser")]
-        public async Task<ActionResult<IdentityUser>> CreateUser([FromQuery] string email, [FromQuery] string password, [FromQuery] string nome)
+        public async Task<ActionResult<IdentityUser>> CreateUser([FromQuery] string role,[FromQuery] string email, [FromQuery] string password, [FromQuery] string nome)
         {
             // Criar um novo utilizador no AspNetUsers
             IdentityUser identityUser = new IdentityUser();
@@ -70,9 +70,29 @@ namespace Backend.Controllers.API
             // Se o utilizador foi criado com sucesso, adicionar à tabela de utilizadores
             if (result.Succeeded)
             {
-                // !! FALTA ADICIONAR AS ROLES !!
-                _context.SaveChanges();
-                return Ok(identityUser);
+                // Verificar se a role é válida
+                var rolesPermitidos = new HashSet<string> { "Admin", "ComissaoHorario", "ComissaoCurso", "Professor" };
+                if (rolesPermitidos.Contains(role))
+                {
+                    // Adicionar role ao utilizador
+                    var roleResult = await _userManager.AddToRoleAsync(identityUser, role);
+                    if (!roleResult.Succeeded)
+                    {
+                        return BadRequest("Erro ao adicionar role: " + string.Join(", ", roleResult.Errors.Select(e => e.Description)));
+                    }
+
+                    // Adicionar o utilizador à tabela de utilizadores
+                    Utilizador utilizador = new Utilizador();
+                    utilizador.Nome = nome;
+                    utilizador.Email = email;
+                    utilizador.UserId = identityUser.Id;
+                    utilizador.Funcao = role;
+
+                    await _context.AddAsync(utilizador);
+                    _context.SaveChanges();
+                    return Ok(identityUser);
+                }
+                return BadRequest("Role Inválida.");
             }
             else
             {
@@ -99,7 +119,7 @@ namespace Backend.Controllers.API
                 if (passWorks == PasswordVerificationResult.Success)
                 {
                     // Obtém a lista de roles do utilizador
-                    //!!var roles = await _userManager.GetRolesAsync(user);!!
+                    var roles = await _userManager.GetRolesAsync(user);
                     var claims = new List<Claim>
                     {
                         new Claim(JwtRegisteredClaimNames.Sub, user.Id),
@@ -108,10 +128,10 @@ namespace Backend.Controllers.API
                     };
 
                     // Adiciona as roles como claims
-                    //!!foreach (var role in roles)
-                    //{
-                    //    claims.Add(new Claim(ClaimTypes.Role, role));
-                    //}!!
+                    foreach (var role in roles)
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, role));
+                    }
 
                     // Se o login for bem sucedido, gera um token (JWT)
                     var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
@@ -132,6 +152,19 @@ namespace Backend.Controllers.API
 
             // Se chegar aqui, é porque algo falhou.
             return BadRequest("Erro ao fazer login...");
+        }
+
+        /// <summary>
+        /// Logout do utilizador
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("logoutUser")]
+        public async Task<ActionResult> LogoutUser()
+        {
+            // Faz logout do utilizador
+            await _signInManager.SignOutAsync();
+            return Ok("O utilizador fez logout com sucesso!");
         }
 
     }

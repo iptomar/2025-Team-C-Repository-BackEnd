@@ -55,10 +55,32 @@ namespace Backend.Controllers
         // GET: BlocosHorario/Create
         public IActionResult Create()
         {
+            // Criar lista de opções de meia em meia hora (08:00 às 23:30)
+            var timeOptions = new List<SelectListItem>();
+            for (int hour = 8; hour < 24; hour++)
+            {
+                timeOptions.Add(new SelectListItem { Value = new TimeSpan(hour, 0, 0).ToString(), Text = $"{hour:00}:00" });
+                timeOptions.Add(new SelectListItem { Value = new TimeSpan(hour, 30, 0).ToString(), Text = $"{hour:00}:30" });
+            }
+
+            ViewBag.TimeOptions = timeOptions;
+
+            // Criar lista de dias da semana
+            ViewBag.DiaSemanaOptions = new SelectList(new[]
+            {
+                new { Value = DayOfWeek.Monday, Text = "Segunda-feira" },
+                new { Value = DayOfWeek.Tuesday, Text = "Terça-feira" },
+                new { Value = DayOfWeek.Wednesday, Text = "Quarta-feira" },
+                new { Value = DayOfWeek.Thursday, Text = "Quinta-feira" },
+                new { Value = DayOfWeek.Friday, Text = "Sexta-feira" },
+                new { Value = DayOfWeek.Saturday, Text = "Sábado" },
+                new { Value = DayOfWeek.Sunday, Text = "Domingo" }
+            }, "Value", "Text");
+
             ViewData["DisciplinaFK"] = new SelectList(_context.UCs, "IdDisciplina", "NomeDisciplina");
             ViewData["ProfessorFK"] = new SelectList(_context.Utilizadores, "IdUtilizador", "Nome");
             ViewData["SalaFK"] = new SelectList(_context.Salas, "IdSala", "Nome");
-            ViewData["TipologiaFK"] = new SelectList(_context.UCs, "IdDisciplina", "Tipologia"); // Corrigido para usar Tipologia
+            ViewData["TipologiaFK"] = new SelectList(_context.UCs, "IdDisciplina", "Tipologia");
             ViewData["TurmaFK"] = new SelectList(_context.Turmas, "IdTurma", "Nome");
             return View();
         }
@@ -107,6 +129,37 @@ namespace Backend.Controllers
             {
                 return NotFound();
             }
+
+            // Criar lista de opções de meia em meia hora (08:00 às 23:30)
+            var timeOptions = new List<SelectListItem>();
+            for (int hour = 8; hour < 24; hour++)
+            {
+                timeOptions.Add(new SelectListItem
+                {
+                    Value = new TimeSpan(hour, 0, 0).ToString(),
+                    Text = $"{hour:00}:00"
+                });
+                timeOptions.Add(new SelectListItem
+                {
+                    Value = new TimeSpan(hour, 30, 0).ToString(),
+                    Text = $"{hour:00}:30"
+                });
+            }
+
+            ViewBag.TimeOptions = timeOptions;
+
+            // Criar lista de dias da semana
+            ViewBag.DiaSemanaOptions = new SelectList(new[]
+            {
+                new { Value = DayOfWeek.Monday, Text = "Segunda-feira" },
+                new { Value = DayOfWeek.Tuesday, Text = "Terça-feira" },
+                new { Value = DayOfWeek.Wednesday, Text = "Quarta-feira" },
+                new { Value = DayOfWeek.Thursday, Text = "Quinta-feira" },
+                new { Value = DayOfWeek.Friday, Text = "Sexta-feira" },
+                new { Value = DayOfWeek.Saturday, Text = "Sábado" },
+                new { Value = DayOfWeek.Sunday, Text = "Domingo" }
+            }, "Value", "Text", blocoHorario.DiaSemana);
+
             ViewData["DisciplinaFK"] = new SelectList(_context.UCs, "IdDisciplina", "NomeDisciplina", blocoHorario.DisciplinaFK);
             ViewData["ProfessorFK"] = new SelectList(_context.Utilizadores, "IdUtilizador", "Nome", blocoHorario.ProfessorFK);
             ViewData["SalaFK"] = new SelectList(_context.Salas, "IdSala", "Nome", blocoHorario.SalaFK);

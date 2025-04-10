@@ -19,7 +19,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddRoles<IdentityRole>() 
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// Autenticação JWT, configuração:
+// Autenticaï¿½ï¿½o JWT, configuraï¿½ï¿½o:
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -74,7 +74,12 @@ app.MapRazorPages();
 
 app.UseCors("AllowReactApp");
 
-// DB SEED
-await DbInitializer.SeedAsync(app.Services);
+// para inicializar a base de dados com dados de teste
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    DbInitializer.Initialize(context);
+}
 
 app.Run();

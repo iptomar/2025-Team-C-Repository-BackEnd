@@ -7,16 +7,19 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Backend.Data;
 using Backend.Models;
+using Backend.Services;
 
 namespace Backend.Controllers
 {
     public class BlocosHorarioController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly HorarioValidator _horarioValidator;
 
-        public BlocosHorarioController(ApplicationDbContext context)
+        public BlocosHorarioController(ApplicationDbContext context, HorarioValidator horarioValidator)
         {
             _context = context;
+            _horarioValidator = horarioValidator;
         }
 
         // GET: BlocosHorario
@@ -55,29 +58,39 @@ namespace Backend.Controllers
             ViewData["DisciplinaFK"] = new SelectList(_context.UCs, "IdDisciplina", "NomeDisciplina");
             ViewData["ProfessorFK"] = new SelectList(_context.Utilizadores, "IdUtilizador", "Nome");
             ViewData["SalaFK"] = new SelectList(_context.Salas, "IdSala", "Nome");
-            ViewData["TipologiaFK"] = new SelectList(_context.UCs, "IdDisciplina", "IdDisciplina"); // TO-DO: ver o que este retorna
+            ViewData["TipologiaFK"] = new SelectList(_context.UCs, "IdDisciplina", "Tipologia"); // Corrigido para usar Tipologia
             ViewData["TurmaFK"] = new SelectList(_context.Turmas, "IdTurma", "Nome");
             return View();
         }
 
         // POST: BlocosHorario/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdBloco,HoraInicio,HoraFim,DiaSemana,ProfessorFK,DisciplinaFK,SalaFK,TurmaFK,TipologiaFK")] BlocoHorario blocoHorario)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(blocoHorario);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                // Validar o bloco de horário
+                var validacao = await _horarioValidator.ValidarBlocoHorario(blocoHorario);
+
+                if (!validacao.isValid)
+                {
+                    ModelState.AddModelError(string.Empty, validacao.errorMessage);
+                }
+                else
+                {
+                    _context.Add(blocoHorario);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
             }
-            ViewData["DisciplinaFK"] = new SelectList(_context.UCs, "IdDisciplina", "IdDisciplina", blocoHorario.DisciplinaFK);
-            ViewData["ProfessorFK"] = new SelectList(_context.Utilizadores, "IdUtilizador", "IdUtilizador", blocoHorario.ProfessorFK);
-            ViewData["SalaFK"] = new SelectList(_context.Salas, "IdSala", "IdSala", blocoHorario.SalaFK);
-            ViewData["TipologiaFK"] = new SelectList(_context.UCs, "IdDisciplina", "IdDisciplina", blocoHorario.TipologiaFK);
-            ViewData["TurmaFK"] = new SelectList(_context.Turmas, "IdTurma", "IdTurma", blocoHorario.TurmaFK);
+
+            // Se chegou aqui, algo está inválido, recarregar os dados para a view
+            ViewData["DisciplinaFK"] = new SelectList(_context.UCs, "IdDisciplina", "NomeDisciplina", blocoHorario.DisciplinaFK);
+            ViewData["ProfessorFK"] = new SelectList(_context.Utilizadores, "IdUtilizador", "Nome", blocoHorario.ProfessorFK);
+            ViewData["SalaFK"] = new SelectList(_context.Salas, "IdSala", "Nome", blocoHorario.SalaFK);
+            ViewData["TipologiaFK"] = new SelectList(_context.UCs, "IdDisciplina", "Tipologia", blocoHorario.TipologiaFK);
+            ViewData["TurmaFK"] = new SelectList(_context.Turmas, "IdTurma", "Nome", blocoHorario.TurmaFK);
             return View(blocoHorario);
         }
 
@@ -103,8 +116,6 @@ namespace Backend.Controllers
         }
 
         // POST: BlocosHorario/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdBloco,HoraInicio,HoraFim,DiaSemana,ProfessorFK,DisciplinaFK,SalaFK,TurmaFK,TipologiaFK")] BlocoHorario blocoHorario)
@@ -116,24 +127,36 @@ namespace Backend.Controllers
 
             if (ModelState.IsValid)
             {
-                try
+                // Validar o bloco de horário, excluindo o próprio bloco da validação
+                var validacao = await _horarioValidator.ValidarBlocoHorario(blocoHorario, id);
+
+                if (!validacao.isValid)
                 {
-                    _context.Update(blocoHorario);
-                    await _context.SaveChangesAsync();
+                    ModelState.AddModelError(string.Empty, validacao.errorMessage);
                 }
-                catch (DbUpdateConcurrencyException)
+                else
                 {
-                    if (!BlocoHorarioExists(blocoHorario.IdBloco))
+                    try
                     {
-                        return NotFound();
+                        _context.Update(blocoHorario);
+                        await _context.SaveChangesAsync();
+                        return RedirectToAction(nameof(Index));
                     }
-                    else
+                    catch (DbUpdateConcurrencyException)
                     {
-                        throw;
+                        if (!BlocoHorarioExists(blocoHorario.IdBloco))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
+
+            // Se chegou aqui, algo está inválido, recarregar os dados para a view
             ViewData["DisciplinaFK"] = new SelectList(_context.UCs, "IdDisciplina", "NomeDisciplina", blocoHorario.DisciplinaFK);
             ViewData["ProfessorFK"] = new SelectList(_context.Utilizadores, "IdUtilizador", "Nome", blocoHorario.ProfessorFK);
             ViewData["SalaFK"] = new SelectList(_context.Salas, "IdSala", "Nome", blocoHorario.SalaFK);

@@ -26,12 +26,12 @@
             </div>
             <div class="form-group">
                 <label asp-for="TipoSala" class="control-label"></label>
-                <input asp-for="TipoSala" class="form-control" />
+                <select asp-for="TipoSala" class="form-control" asp-items="ViewBag.TipoSala"></select>
                 <span asp-validation-for="TipoSala" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Localizacao" class="control-label"></label>
-                <input asp-for="Localizacao" class="form-control" />
+                <select asp-for="Localizacao" class="form-control" asp-items="ViewBag.Localizacao"></select>
                 <span asp-validation-for="Localizacao" class="text-danger"></span>
             </div>
             <div class="form-group">

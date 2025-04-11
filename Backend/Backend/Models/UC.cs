@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Backend.Models
 {
@@ -6,8 +7,14 @@ namespace Backend.Models
     {
         [Key]
         public int IdDisciplina { get; set; }
+
+        [DisplayName("Nome da Disciplina")]
         public string NomeDisciplina { get; set; } = string.Empty;
+
+        [DisplayName("Tipo de Disciplina")]
         public string TipoDisciplina { get; set; } = string.Empty; //TODO: isto aqui é o quê? (estava "Obrigatória, Opcional") - será preciso?
+
+        [DisplayName("Grau Académico")]
         public string GrauAcademico { get; set; } = string.Empty; //Licenciatura, Mestrado, Doutoramento, etc
         public string Tipologia { get; set; } = string.Empty;
         public string Semestre { get; set; } = string.Empty;

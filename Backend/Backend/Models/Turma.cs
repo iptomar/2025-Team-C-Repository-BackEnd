@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 
 namespace Backend.Models
 {
@@ -11,6 +12,7 @@ namespace Backend.Models
 
         // FK para referenciar a disciplina da turma
         [ForeignKey(nameof(Disciplina))]
+        [DisplayName("Disciplina")]
         public int DisciplinaFK { get; set; }
         public UC Disciplina { get; set; }
 

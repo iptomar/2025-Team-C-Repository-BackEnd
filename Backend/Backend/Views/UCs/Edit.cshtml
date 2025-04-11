@@ -21,22 +21,22 @@
             </div>
             <div class="form-group">
                 <label asp-for="TipoDisciplina" class="control-label"></label>
-                <input asp-for="TipoDisciplina" class="form-control" />
+                <select asp-for="TipoDisciplina" class="form-control" asp-items="ViewBag.TiposDisciplina"></select>
                 <span asp-validation-for="TipoDisciplina" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="GrauAcademico" class="control-label"></label>
-                <input asp-for="GrauAcademico" class="form-control" />
+                <select asp-for="GrauAcademico" class="form-control" asp-items="ViewBag.GrausAcademicos"></select>
                 <span asp-validation-for="GrauAcademico" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Tipologia" class="control-label"></label>
-                <input asp-for="Tipologia" class="form-control" />
+                <select asp-for="Tipologia" class="form-control" asp-items="ViewBag.Tipologias"></select>
                 <span asp-validation-for="Tipologia" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Semestre" class="control-label"></label>
-                <input asp-for="Semestre" class="form-control" />
+                <select asp-for="Semestre" class="form-control" asp-items="ViewBag.Semestres"></select>
                 <span asp-validation-for="Semestre" class="text-danger"></span>
             </div>
             <div class="form-group">

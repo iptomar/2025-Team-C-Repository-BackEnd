@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Backend.Models
 {
@@ -7,6 +8,8 @@ namespace Backend.Models
         [Key]
         public int IdEscola { get; set; }
         public string Nome { get; set; } = string.Empty;
+
+        [DisplayName("localização")]
         public string Localizacao { get; set; }
 
         /// <summary>

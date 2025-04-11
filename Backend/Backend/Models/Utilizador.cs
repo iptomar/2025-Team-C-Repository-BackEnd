@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 
 namespace Backend.Models
 {
@@ -19,6 +20,7 @@ namespace Backend.Models
 
         // FK para a escola principal
         [ForeignKey(nameof(Escola))]
+        [DisplayName("Escola")]
         public int? EscolaFK { get; set; }
         public Escola Escola { get; set; }
 

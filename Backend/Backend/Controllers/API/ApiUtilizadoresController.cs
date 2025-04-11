@@ -71,7 +71,7 @@ namespace Backend.Controllers.API
             if (result.Succeeded)
             {
                 // Verificar se a role é válida
-                var rolesPermitidos = new HashSet<string> { "Admin", "ComissaoHorario", "ComissaoCurso", "Professor" };
+                var rolesPermitidos = new HashSet<string> { "Administrador", "MembroComissao", "Docente" };
                 if (rolesPermitidos.Contains(role))
                 {
                     // Adicionar role ao utilizador

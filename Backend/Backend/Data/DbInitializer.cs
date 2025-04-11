@@ -1,4 +1,5 @@
 using Backend.Models;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Linq;
 
@@ -6,7 +7,7 @@ namespace Backend.Data
 {
     public static class DbInitializer
     {
-        public static void Initialize(ApplicationDbContext context)
+        public static async Task InitializeAsync(ApplicationDbContext context, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             context.Database.EnsureCreated();
 
@@ -25,6 +26,17 @@ namespace Backend.Data
             };
             context.Escolas.AddRange(escolas);
             context.SaveChanges();
+
+            // Adicionar Roles
+            string[] roles = new string[] { "Administrador", "Docente", "MembroComissao" };
+
+            foreach (var role in roles)
+            {
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(role));
+                }
+            }
 
             // Adicionar users
             var utilizadores = new Utilizador[]

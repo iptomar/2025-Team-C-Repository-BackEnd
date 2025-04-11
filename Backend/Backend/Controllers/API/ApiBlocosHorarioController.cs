@@ -1,6 +1,7 @@
 ﻿using Backend.Data;
 using Backend.DTO;
 using Backend.Models;
+using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,11 +17,17 @@ namespace Backend.Controllers.API
         private readonly ApplicationDbContext _context;
 
         /// <summary>
+        /// Permite fazer a verificação de blocos de horário.
+        /// </summary>
+        private readonly HorarioValidator _horarioValidator;
+
+        /// <summary>
         /// Construtor
         /// </summary>
-        public ApiBlocosHorarioController(ApplicationDbContext context)
+        public ApiBlocosHorarioController(ApplicationDbContext context, HorarioValidator horarioValidator)
         {
             _context = context;
+            _horarioValidator = horarioValidator;
         }
 
         /// <summary>
@@ -98,6 +105,11 @@ namespace Backend.Controllers.API
         [Route("create")]
         public async Task<IActionResult> Create([FromBody] BlocoHorario blocoHorario)
         {
+            // Validar o bloco de horário
+            var validacao = await _horarioValidator.ValidarBlocoHorario(blocoHorario);
+            if (!validacao.isValid)
+                return BadRequest(new { message = validacao.errorMessage });
+
             _context.BlocosHorario.Add(blocoHorario);
             await _context.SaveChangesAsync();
 
@@ -116,6 +128,12 @@ namespace Backend.Controllers.API
         {
             if (id != blocoHorario.IdBloco)
                 return BadRequest();
+
+
+            // Validar o bloco de horário
+            var validacao = await _horarioValidator.ValidarBlocoHorario(blocoHorario);
+            if (!validacao.isValid)
+                return BadRequest(new { message = validacao.errorMessage });
 
             _context.Entry(blocoHorario).State = EntityState.Modified;
 

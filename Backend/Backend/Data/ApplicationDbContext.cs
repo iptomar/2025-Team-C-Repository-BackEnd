@@ -43,11 +43,40 @@ public class ApplicationDbContext : IdentityDbContext
             .WithMany(u => u.DisciplinasLecionadas)
             .UsingEntity(j => j.ToTable("UCDocentes"));
 
-        // Fix BlocoHorario issue with Tipologia
+        // BlocoHorario - Tipologia
         modelBuilder.Entity<BlocoHorario>()
             .HasOne(b => b.Tipologia)
             .WithMany()
             .HasForeignKey(b => b.TipologiaFK)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // BlocoHorario - Disciplina
+        modelBuilder.Entity<BlocoHorario>()
+            .HasOne(b => b.Disciplina)
+            .WithMany()
+            .HasForeignKey(b => b.DisciplinaFK)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // BlocoHorario - Professor
+        modelBuilder.Entity<BlocoHorario>()
+            .HasOne(b => b.Professor)
+            .WithMany()
+            .HasForeignKey(b => b.ProfessorFK)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // BlocoHorario - Sala
+        modelBuilder.Entity<BlocoHorario>()
+            .HasOne(b => b.Sala)
+            .WithMany()
+            .HasForeignKey(b => b.SalaFK)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // BlocoHorario - Turma
+        modelBuilder.Entity<BlocoHorario>()
+            .HasOne(b => b.Turma)
+            .WithMany()
+            .HasForeignKey(b => b.TurmaFK)
+            .OnDelete(DeleteBehavior.Restrict);
     }
+
 }

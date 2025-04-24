@@ -1,8 +1,10 @@
 ﻿using Backend.Data;
 using Backend.DTO;
+using Backend.Hubs;
 using Backend.Models;
 using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Controllers.API
@@ -22,12 +24,18 @@ namespace Backend.Controllers.API
         private readonly HorarioValidator _horarioValidator;
 
         /// <summary>
+        /// Permite a comunicação em tempo real com o cliente.
+        /// </summary>
+        private readonly IHubContext<HorarioHub> _hubContext;
+
+        /// <summary>
         /// Construtor
         /// </summary>
-        public ApiBlocosHorarioController(ApplicationDbContext context, HorarioValidator horarioValidator)
+        public ApiBlocosHorarioController(ApplicationDbContext context, HorarioValidator horarioValidator, IHubContext<HorarioHub> hubContext)
         {
             _context = context;
             _horarioValidator = horarioValidator;
+            _hubContext = hubContext;
         }
 
         /// <summary>
@@ -112,6 +120,10 @@ namespace Backend.Controllers.API
 
             _context.BlocosHorario.Add(blocoHorario);
             await _context.SaveChangesAsync();
+
+
+            // Notificar os clientes conectados
+            await _hubContext.Clients.All.SendAsync("ReceberAtualizacao", "Bloco de horário criado.");
 
             return CreatedAtAction(nameof(GetById), new { id = blocoHorario.IdBloco }, blocoHorario);
         }

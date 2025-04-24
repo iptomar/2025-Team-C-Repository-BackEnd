@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste SignalR</title>
+</head>
+<body>
+    <div id="mensagens"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
+    <script>const mensagensDiv = document.getElementById('mensagens');
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl('/horariohub')
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+
+        async function start() {
+            try {
+                await connection.start();
+                console.log("SignalR Conectado.");
+                mensagensDiv.innerHTML += "<p>SignalR Conectado</p>";
+            } catch (err) {
+                console.log(err);
+                setTimeout(start, 5000);
+            }
+        }
+
+        connection.onclose(async () => {
+            await start();
+        });
+
+        connection.on("ReceberAtualizacao", (message) => {
+            console.log("Mensagem recebida:", message);
+            mensagensDiv.innerHTML += `<p>Recebido: ${message}</p>`;
+        });
+
+        start();</script>
+</body>
+</html>

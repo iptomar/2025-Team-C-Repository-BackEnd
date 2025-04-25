@@ -122,8 +122,29 @@ namespace Backend.Controllers.API
             await _context.SaveChangesAsync();
 
 
-            // Notificar os clientes conectados
-            await _hubContext.Clients.All.SendAsync("ReceberAtualizacao", "Bloco de horário criado.");
+            // Carregar entidades relacionadas para criar o DTO
+            await _context.Entry(blocoHorario).Reference(b => b.Professor).LoadAsync();
+            await _context.Entry(blocoHorario).Reference(b => b.Disciplina).LoadAsync();
+            await _context.Entry(blocoHorario).Reference(b => b.Sala).LoadAsync();
+            await _context.Entry(blocoHorario).Reference(b => b.Tipologia).LoadAsync();
+            await _context.Entry(blocoHorario).Reference(b => b.Turma).LoadAsync();
+
+            // Criar DTO para enviar ao cliente
+            var blocoDTO = new BlocoHorarioDTO
+            {
+                IdBloco = blocoHorario.IdBloco,
+                HoraInicio = blocoHorario.HoraInicio,
+                HoraFim = blocoHorario.HoraFim,
+                DiaSemana = blocoHorario.DiaSemana,
+                ProfessorNome = blocoHorario.Professor.Nome,
+                DisciplinaNome = blocoHorario.Disciplina.NomeDisciplina,
+                SalaNome = blocoHorario.Sala.Nome,
+                Tipologia = blocoHorario.Tipologia.Tipologia,
+                TurmaNome = blocoHorario.Turma.Nome
+            };
+
+            // Notificar os clientes conectados com os dados do bloco
+            await _hubContext.Clients.All.SendAsync("BlocoAdicionado", blocoDTO);
 
             return CreatedAtAction(nameof(GetById), new { id = blocoHorario.IdBloco }, blocoHorario);
         }
@@ -141,7 +162,6 @@ namespace Backend.Controllers.API
             if (id != blocoHorario.IdBloco)
                 return BadRequest();
 
-
             // Validar o bloco de horário
             var validacao = await _horarioValidator.ValidarBlocoHorario(blocoHorario);
             if (!validacao.isValid)
@@ -152,6 +172,32 @@ namespace Backend.Controllers.API
             try
             {
                 await _context.SaveChangesAsync();
+
+                // Recarregar o bloco com suas relações
+                await _context.Entry(blocoHorario).Reference(b => b.Professor).LoadAsync();
+                await _context.Entry(blocoHorario).Reference(b => b.Disciplina).LoadAsync();
+                await _context.Entry(blocoHorario).Reference(b => b.Sala).LoadAsync();
+                await _context.Entry(blocoHorario).Reference(b => b.Tipologia).LoadAsync();
+                await _context.Entry(blocoHorario).Reference(b => b.Turma).LoadAsync();
+
+                // Criar DTO para enviar ao cliente
+                var blocoDTO = new BlocoHorarioDTO
+                {
+                    IdBloco = blocoHorario.IdBloco,
+                    HoraInicio = blocoHorario.HoraInicio,
+                    HoraFim = blocoHorario.HoraFim,
+                    DiaSemana = blocoHorario.DiaSemana,
+                    ProfessorNome = blocoHorario.Professor.Nome,
+                    DisciplinaNome = blocoHorario.Disciplina.NomeDisciplina,
+                    SalaNome = blocoHorario.Sala.Nome,
+                    Tipologia = blocoHorario.Tipologia.Tipologia,
+                    TurmaNome = blocoHorario.Turma.Nome
+                };
+
+                // Notificar os clientes conectados
+                await _hubContext.Clients.All.SendAsync("BlocoEditado", blocoDTO);
+
+                return NoContent();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -160,8 +206,6 @@ namespace Backend.Controllers.API
                 else
                     throw;
             }
-
-            return NoContent();
         }
 
         /// <summary>
@@ -179,6 +223,9 @@ namespace Backend.Controllers.API
 
             _context.BlocosHorario.Remove(bloco);
             await _context.SaveChangesAsync();
+
+            // Notificar os clientes sobre a exclusão
+            await _hubContext.Clients.All.SendAsync("BlocoExcluido", id);
 
             return NoContent();
         }

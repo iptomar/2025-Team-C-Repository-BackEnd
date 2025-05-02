@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Backend.Data;
 using Backend.Services;
+using Backend.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -48,6 +49,8 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -86,5 +89,8 @@ using (var scope = app.Services.CreateScope())
 
     await DbInitializer.InitializeAsync(context, userManager, roleManager);
 }
+
+// Mapear o Hub no pipeline de requisições
+app.MapHub<HorarioHub>("/horarioHub");
 
 app.Run();

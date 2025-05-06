@@ -146,7 +146,7 @@ namespace Backend.Controllers.API
             // Notificar os clientes conectados com os dados do bloco
             await _hubContext.Clients.All.SendAsync("BlocoAdicionado", blocoDTO);
 
-            return CreatedAtAction(nameof(GetById), new { id = blocoHorario.IdBloco }, blocoHorario);
+            return CreatedAtAction(nameof(GetById), new { id = blocoHorario.IdBloco }, blocoDTO);
         }
 
         /// <summary>

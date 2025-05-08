@@ -45,7 +45,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("http://localhost:3000") // Porta do seu React
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 

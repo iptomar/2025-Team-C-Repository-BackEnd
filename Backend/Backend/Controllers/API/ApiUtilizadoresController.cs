@@ -3,6 +3,7 @@ using Backend.DTO;
 using Backend.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -167,5 +168,31 @@ namespace Backend.Controllers.API
             return Ok("O utilizador fez logout com sucesso!");
         }
 
+        /// <summary>
+        /// Retorna todos os utilizadores com função de Docente.
+        /// </summary>
+        /// <returns>Lista de docentes</returns>
+        [HttpGet]
+        [Route("GetDocentes")]
+        public async Task<ActionResult<IEnumerable<UtilizadorDTO>>> GetDocentes()
+        {
+            // Faz a busca dos utilizadores, cujo a sua função é "Docente"
+            var docentes = await _context.Utilizadores
+                .Where(u => u.Funcao == "Docente")
+                .Include(u => u.Escola)
+                .Select(u => new UtilizadorDTO
+                {
+                    IdUtilizador = u.IdUtilizador,
+                    Nome = u.Nome,
+                    Email = u.Email,
+                    Funcao = u.Funcao,
+                    Categoria = u.Categoria,
+                    EscolaFK = u.EscolaFK,
+                    EscolaNome = u.Escola != null ? u.Escola.Nome : null
+                })
+                .OrderBy(u => u.Nome)
+                .ToListAsync();
+            return Ok(docentes);
+        }
     }
 }

@@ -7,14 +7,15 @@ namespace Backend.Models
     public class UC
     {
         [Key]
-        public int IdDisciplina { get; set; }
-        public string NomeDisciplina { get; set; } = string.Empty;
-        public string TipoDisciplina { get; set; } = string.Empty; //teórica / teórico pratica / prática / laboratorial etc.
+        public int IdUC { get; set; }
+        public string NomeUC { get; set; } = string.Empty;
+        public string TipoUC { get; set; } = string.Empty; //teórica / teórico pratica / prática / laboratorial etc.
         public string GrauAcademico { get; set; } = string.Empty; //Licenciatura, Mestrado, Doutoramento, etc
-        //TODO: ISTO É NECESSÁRIO?
-        // public string Tipologia { get; set; } = string.Empty;
+        public string? Tipologia { get; set; } = string.Empty;
         public string Semestre { get; set; } = string.Empty;
 
+        [RegularExpression(@"^[1-4]$", ErrorMessage = "O ano deve ser um valor de 1 a 4.")]
+        public int? Ano { get; set; } // 1º ano, 2º ano, etc.
 
         /// <summary>
         /// Lista dos docentes que lecionam esta disciplina

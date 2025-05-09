@@ -15,8 +15,8 @@ namespace Backend.Models
         [DisplayName("Hora de Fim")]
         public TimeSpan HoraFim { get; set; }
 
-        [DisplayName("Dia da Semana")]
-        public DayOfWeek DiaSemana { get; set; }
+        [DisplayName("Dia")]
+        public DateOnly Dia { get; set; }
 
         // FK para referenciar o professor do bloco
         [ForeignKey(nameof(Professor))]
@@ -24,11 +24,11 @@ namespace Backend.Models
         public int ProfessorFK { get; set; }
         public Utilizador Professor { get; set; }
 
-        // FK para referenciar a disciplina do bloco
-        [ForeignKey(nameof(Disciplina))]
-        [DisplayName("Disciplina")]
-        public int DisciplinaFK { get; set; }
-        public UC Disciplina { get; set; }
+        // FK para referenciar a UC do bloco
+        [ForeignKey(nameof(UnidadeCurricular))]
+        [DisplayName("UnidadeCurricular")]
+        public int UnidadeCurricularFK { get; set; }
+        public UC UnidadeCurricular { get; set; }
 
         // FK para referenciar a sala do bloco
         [ForeignKey(nameof(Sala))]
@@ -41,11 +41,5 @@ namespace Backend.Models
         [DisplayName("Turma")]
         public int TurmaFK { get; set; }
         public Turma Turma { get; set; }
-
-        // FK para referenciar a tipologia do bloco
-        [ForeignKey("Tipologia")]
-        [DisplayName("Tipologia")]
-        public int TipologiaFK { get; set; }
-        public UC Tipologia { get; set; }
     }
 }

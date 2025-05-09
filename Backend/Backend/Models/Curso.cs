@@ -12,6 +12,11 @@ namespace Backend.Models
         [DisplayName("Nome do Curso")]
         public string Nome { get; set; }
 
+        [DisplayName("Grau")]
+        [RegularExpression(@"^(Licenciatura|Mestrado|Doutoramento|Pós-Graduação|Microcredenciação|Técnico Superior Profissional)$",
+            ErrorMessage = "O Grau deve ser um dos seguintes: Licenciatura, Mestrado, Doutoramento, Pós-Graduação, Microcredenciação ou Técnico Superior Profissional")]
+        public string Grau { get; set; }
+
         // FK para referenciar a escola do curso
         [ForeignKey(nameof(Escola))]
         [DisplayName("Escola")]
@@ -19,6 +24,6 @@ namespace Backend.Models
         public Escola Escola { get; set; }
 
         // Lista de UCs que compõem o curso
-        public ICollection<UC> Disciplinas { get; set; }
+        public ICollection<UC> UnidadesCurriculares { get; set; }
     }
 }

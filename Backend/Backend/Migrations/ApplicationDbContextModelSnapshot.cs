@@ -4,19 +4,16 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Backend_v02.Data.Migrations
+namespace Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250402150514_MigracaoInicial")]
-    partial class MigracaoInicial
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,7 +22,7 @@ namespace Backend_v02.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Backend_v02.Models.BlocoHorario", b =>
+            modelBuilder.Entity("Backend.Models.BlocoHorario", b =>
                 {
                     b.Property<int>("IdBloco")
                         .ValueGeneratedOnAdd()
@@ -33,11 +30,8 @@ namespace Backend_v02.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdBloco"));
 
-                    b.Property<int>("DiaSemana")
-                        .HasColumnType("int");
-
-                    b.Property<int>("DisciplinaFK")
-                        .HasColumnType("int");
+                    b.Property<DateOnly>("Dia")
+                        .HasColumnType("date");
 
                     b.Property<TimeSpan>("HoraFim")
                         .HasColumnType("time");
@@ -51,28 +45,50 @@ namespace Backend_v02.Data.Migrations
                     b.Property<int>("SalaFK")
                         .HasColumnType("int");
 
-                    b.Property<int>("TipologiaFK")
-                        .HasColumnType("int");
-
                     b.Property<int>("TurmaFK")
                         .HasColumnType("int");
 
-                    b.HasKey("IdBloco");
+                    b.Property<int>("UnidadeCurricularFK")
+                        .HasColumnType("int");
 
-                    b.HasIndex("DisciplinaFK");
+                    b.HasKey("IdBloco");
 
                     b.HasIndex("ProfessorFK");
 
                     b.HasIndex("SalaFK");
 
-                    b.HasIndex("TipologiaFK");
-
                     b.HasIndex("TurmaFK");
+
+                    b.HasIndex("UnidadeCurricularFK");
 
                     b.ToTable("BlocosHorario");
                 });
 
-            modelBuilder.Entity("Backend_v02.Models.Escola", b =>
+            modelBuilder.Entity("Backend.Models.Curso", b =>
+                {
+                    b.Property<int>("IdCurso")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCurso"));
+
+                    b.Property<int>("EscolaFK")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Grau")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Nome")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdCurso");
+
+                    b.HasIndex("EscolaFK");
+
+                    b.ToTable("Cursos");
+                });
+
+            modelBuilder.Entity("Backend.Models.Escola", b =>
                 {
                     b.Property<int>("IdEscola")
                         .ValueGeneratedOnAdd()
@@ -91,7 +107,7 @@ namespace Backend_v02.Data.Migrations
                     b.ToTable("Escolas");
                 });
 
-            modelBuilder.Entity("Backend_v02.Models.Sala", b =>
+            modelBuilder.Entity("Backend.Models.Sala", b =>
                 {
                     b.Property<int>("IdSala")
                         .ValueGeneratedOnAdd()
@@ -121,7 +137,7 @@ namespace Backend_v02.Data.Migrations
                     b.ToTable("Salas");
                 });
 
-            modelBuilder.Entity("Backend_v02.Models.Turma", b =>
+            modelBuilder.Entity("Backend.Models.Turma", b =>
                 {
                     b.Property<int>("IdTurma")
                         .ValueGeneratedOnAdd()
@@ -142,35 +158,43 @@ namespace Backend_v02.Data.Migrations
                     b.ToTable("Turmas");
                 });
 
-            modelBuilder.Entity("Backend_v02.Models.UC", b =>
+            modelBuilder.Entity("Backend.Models.UC", b =>
                 {
-                    b.Property<int>("IdDisciplina")
+                    b.Property<int>("IdUC")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdDisciplina"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdUC"));
+
+                    b.Property<int?>("Ano")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CursoFK")
+                        .HasColumnType("int");
 
                     b.Property<string>("GrauAcademico")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("NomeDisciplina")
+                    b.Property<string>("NomeUC")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Semestre")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TipoDisciplina")
+                    b.Property<string>("TipoUC")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Tipologia")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("IdDisciplina");
+                    b.HasKey("IdUC");
+
+                    b.HasIndex("CursoFK");
 
                     b.ToTable("UCs");
                 });
 
-            modelBuilder.Entity("Backend_v02.Models.Utilizador", b =>
+            modelBuilder.Entity("Backend.Models.Utilizador", b =>
                 {
                     b.Property<int>("IdUtilizador")
                         .ValueGeneratedOnAdd()
@@ -187,7 +211,7 @@ namespace Backend_v02.Data.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("EscolaFK")
+                    b.Property<int?>("EscolaIdEscola")
                         .HasColumnType("int");
 
                     b.Property<string>("Funcao")
@@ -196,26 +220,14 @@ namespace Backend_v02.Data.Migrations
                     b.Property<string>("Nome")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("IdUtilizador");
 
-                    b.HasIndex("EscolaFK");
+                    b.HasIndex("EscolaIdEscola");
 
                     b.ToTable("Utilizadores");
-                });
-
-            modelBuilder.Entity("EscolaUtilizador", b =>
-                {
-                    b.Property<int>("EscolasOndeEnsinaIdEscola")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MembrosComissaoHorariosIdUtilizador")
-                        .HasColumnType("int");
-
-                    b.HasKey("EscolasOndeEnsinaIdEscola", "MembrosComissaoHorariosIdUtilizador");
-
-                    b.HasIndex("MembrosComissaoHorariosIdUtilizador");
-
-                    b.ToTable("EscolaUtilizadorComissao", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -422,65 +434,68 @@ namespace Backend_v02.Data.Migrations
 
             modelBuilder.Entity("UCUtilizador", b =>
                 {
-                    b.Property<int>("DisciplinasLecionadasIdDisciplina")
-                        .HasColumnType("int");
-
                     b.Property<int>("DocentesIdUtilizador")
                         .HasColumnType("int");
 
-                    b.HasKey("DisciplinasLecionadasIdDisciplina", "DocentesIdUtilizador");
+                    b.Property<int>("UCsLecionadasIdUC")
+                        .HasColumnType("int");
 
-                    b.HasIndex("DocentesIdUtilizador");
+                    b.HasKey("DocentesIdUtilizador", "UCsLecionadasIdUC");
 
-                    b.ToTable("UCDocentes", (string)null);
+                    b.HasIndex("UCsLecionadasIdUC");
+
+                    b.ToTable("UCUtilizador");
                 });
 
-            modelBuilder.Entity("Backend_v02.Models.BlocoHorario", b =>
+            modelBuilder.Entity("Backend.Models.BlocoHorario", b =>
                 {
-                    b.HasOne("Backend_v02.Models.UC", "Disciplina")
-                        .WithMany()
-                        .HasForeignKey("DisciplinaFK")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Backend_v02.Models.Utilizador", "Professor")
+                    b.HasOne("Backend.Models.Utilizador", "Professor")
                         .WithMany("BlocosHorario")
                         .HasForeignKey("ProfessorFK")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Backend_v02.Models.Sala", "Sala")
+                    b.HasOne("Backend.Models.Sala", "Sala")
                         .WithMany("BlocosHorario")
                         .HasForeignKey("SalaFK")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Backend_v02.Models.UC", "Tipologia")
-                        .WithMany()
-                        .HasForeignKey("TipologiaFK")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Backend_v02.Models.Turma", "Turma")
+                    b.HasOne("Backend.Models.Turma", "Turma")
                         .WithMany("BlocosHorario")
                         .HasForeignKey("TurmaFK")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Disciplina");
+                    b.HasOne("Backend.Models.UC", "UnidadeCurricular")
+                        .WithMany()
+                        .HasForeignKey("UnidadeCurricularFK")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Professor");
 
                     b.Navigation("Sala");
 
-                    b.Navigation("Tipologia");
-
                     b.Navigation("Turma");
+
+                    b.Navigation("UnidadeCurricular");
                 });
 
-            modelBuilder.Entity("Backend_v02.Models.Sala", b =>
+            modelBuilder.Entity("Backend.Models.Curso", b =>
                 {
-                    b.HasOne("Backend_v02.Models.Escola", "Escola")
+                    b.HasOne("Backend.Models.Escola", "Escola")
+                        .WithMany()
+                        .HasForeignKey("EscolaFK")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Escola");
+                });
+
+            modelBuilder.Entity("Backend.Models.Sala", b =>
+                {
+                    b.HasOne("Backend.Models.Escola", "Escola")
                         .WithMany("Salas")
                         .HasForeignKey("EscolaFK")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -489,9 +504,9 @@ namespace Backend_v02.Data.Migrations
                     b.Navigation("Escola");
                 });
 
-            modelBuilder.Entity("Backend_v02.Models.Turma", b =>
+            modelBuilder.Entity("Backend.Models.Turma", b =>
                 {
-                    b.HasOne("Backend_v02.Models.UC", "Disciplina")
+                    b.HasOne("Backend.Models.UC", "Disciplina")
                         .WithMany("Turmas")
                         .HasForeignKey("DisciplinaFK")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -500,29 +515,22 @@ namespace Backend_v02.Data.Migrations
                     b.Navigation("Disciplina");
                 });
 
-            modelBuilder.Entity("Backend_v02.Models.Utilizador", b =>
+            modelBuilder.Entity("Backend.Models.UC", b =>
                 {
-                    b.HasOne("Backend_v02.Models.Escola", "Escola")
-                        .WithMany()
-                        .HasForeignKey("EscolaFK")
-                        .OnDelete(DeleteBehavior.Restrict);
+                    b.HasOne("Backend.Models.Curso", "Curso")
+                        .WithMany("UnidadesCurriculares")
+                        .HasForeignKey("CursoFK")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Escola");
+                    b.Navigation("Curso");
                 });
 
-            modelBuilder.Entity("EscolaUtilizador", b =>
+            modelBuilder.Entity("Backend.Models.Utilizador", b =>
                 {
-                    b.HasOne("Backend_v02.Models.Escola", null)
-                        .WithMany()
-                        .HasForeignKey("EscolasOndeEnsinaIdEscola")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Backend_v02.Models.Utilizador", null)
-                        .WithMany()
-                        .HasForeignKey("MembrosComissaoHorariosIdUtilizador")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("Backend.Models.Escola", null)
+                        .WithMany("Membros")
+                        .HasForeignKey("EscolaIdEscola");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -578,40 +586,47 @@ namespace Backend_v02.Data.Migrations
 
             modelBuilder.Entity("UCUtilizador", b =>
                 {
-                    b.HasOne("Backend_v02.Models.UC", null)
-                        .WithMany()
-                        .HasForeignKey("DisciplinasLecionadasIdDisciplina")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Backend_v02.Models.Utilizador", null)
+                    b.HasOne("Backend.Models.Utilizador", null)
                         .WithMany()
                         .HasForeignKey("DocentesIdUtilizador")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Backend.Models.UC", null)
+                        .WithMany()
+                        .HasForeignKey("UCsLecionadasIdUC")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
-            modelBuilder.Entity("Backend_v02.Models.Escola", b =>
+            modelBuilder.Entity("Backend.Models.Curso", b =>
                 {
+                    b.Navigation("UnidadesCurriculares");
+                });
+
+            modelBuilder.Entity("Backend.Models.Escola", b =>
+                {
+                    b.Navigation("Membros");
+
                     b.Navigation("Salas");
                 });
 
-            modelBuilder.Entity("Backend_v02.Models.Sala", b =>
+            modelBuilder.Entity("Backend.Models.Sala", b =>
                 {
                     b.Navigation("BlocosHorario");
                 });
 
-            modelBuilder.Entity("Backend_v02.Models.Turma", b =>
+            modelBuilder.Entity("Backend.Models.Turma", b =>
                 {
                     b.Navigation("BlocosHorario");
                 });
 
-            modelBuilder.Entity("Backend_v02.Models.UC", b =>
+            modelBuilder.Entity("Backend.Models.UC", b =>
                 {
                     b.Navigation("Turmas");
                 });
 
-            modelBuilder.Entity("Backend_v02.Models.Utilizador", b =>
+            modelBuilder.Entity("Backend.Models.Utilizador", b =>
                 {
                     b.Navigation("BlocosHorario");
                 });

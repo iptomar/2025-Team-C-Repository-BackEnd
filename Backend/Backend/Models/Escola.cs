@@ -10,10 +10,9 @@ namespace Backend.Models
         public string Localizacao { get; set; }
 
         /// <summary>
-        /// Lista dos membros da comissão de horários
+        /// Lista dos membros da escola
         /// </summary>
-        public ICollection<Utilizador> MembrosComissaoHorarios { get; set; } = new List<Utilizador>(); //TODO: isto poderia ser a lista de todos os utilizadores de uma escola!?
-                                                                                                       // em vez de existir a lista das escolasOndeEnsina no utilizador?
+        public ICollection<Utilizador> Membros { get; set; } = new List<Utilizador>(); 
 
         /// <summary>
         /// Lista das salas da escola

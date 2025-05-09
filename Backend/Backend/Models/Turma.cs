@@ -14,6 +14,11 @@ namespace Backend.Models
         public int DisciplinaFK { get; set; }
         public UC Disciplina { get; set; }
 
+        // FK para referenciar a curso da turma
+        [ForeignKey(nameof(Curso))]
+        public int CursoFK { get; set; }
+        public Curso Curso { get; set; }
+
         /// <summary>
         /// Lista dos blocos de horário associados a esta turma
         /// </summary>

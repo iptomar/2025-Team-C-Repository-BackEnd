@@ -87,7 +87,7 @@ using (var scope = app.Services.CreateScope())
     var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-    //await DbInitializer.InitializeAsync(context, userManager, roleManager);
+    await DbInitializer.InitializeAsync(context, userManager, roleManager);
 }
 
 // Mapear o Hub no pipeline de requisições

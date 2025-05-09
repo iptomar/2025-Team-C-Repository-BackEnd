@@ -280,7 +280,7 @@ namespace Backend.Migrations
                         column: x => x.DisciplinaFK,
                         principalTable: "UCs",
                         principalColumn: "IdUC",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(

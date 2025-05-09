@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class MudancaModels : Migration
+    public partial class TurmaEdit : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -239,6 +239,26 @@ namespace Backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Turmas",
+                columns: table => new
+                {
+                    IdTurma = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CursoFK = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Turmas", x => x.IdTurma);
+                    table.ForeignKey(
+                        name: "FK_Turmas_Cursos_CursoFK",
+                        column: x => x.CursoFK,
+                        principalTable: "Cursos",
+                        principalColumn: "IdCurso",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UCs",
                 columns: table => new
                 {
@@ -264,50 +284,6 @@ namespace Backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Turmas",
-                columns: table => new
-                {
-                    IdTurma = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DisciplinaFK = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Turmas", x => x.IdTurma);
-                    table.ForeignKey(
-                        name: "FK_Turmas_UCs_DisciplinaFK",
-                        column: x => x.DisciplinaFK,
-                        principalTable: "UCs",
-                        principalColumn: "IdUC",
-                        onDelete: ReferentialAction.NoAction);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UCUtilizador",
-                columns: table => new
-                {
-                    DocentesIdUtilizador = table.Column<int>(type: "int", nullable: false),
-                    UCsLecionadasIdUC = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UCUtilizador", x => new { x.DocentesIdUtilizador, x.UCsLecionadasIdUC });
-                    table.ForeignKey(
-                        name: "FK_UCUtilizador_UCs_UCsLecionadasIdUC",
-                        column: x => x.UCsLecionadasIdUC,
-                        principalTable: "UCs",
-                        principalColumn: "IdUC",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UCUtilizador_Utilizadores_DocentesIdUtilizador",
-                        column: x => x.DocentesIdUtilizador,
-                        principalTable: "Utilizadores",
-                        principalColumn: "IdUtilizador",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "BlocosHorario",
                 columns: table => new
                 {
@@ -329,22 +305,46 @@ namespace Backend.Migrations
                         column: x => x.SalaFK,
                         principalTable: "Salas",
                         principalColumn: "IdSala",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_BlocosHorario_Turmas_TurmaFK",
                         column: x => x.TurmaFK,
                         principalTable: "Turmas",
                         principalColumn: "IdTurma",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_BlocosHorario_UCs_UnidadeCurricularFK",
                         column: x => x.UnidadeCurricularFK,
                         principalTable: "UCs",
                         principalColumn: "IdUC",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_BlocosHorario_Utilizadores_ProfessorFK",
                         column: x => x.ProfessorFK,
+                        principalTable: "Utilizadores",
+                        principalColumn: "IdUtilizador",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UCUtilizador",
+                columns: table => new
+                {
+                    DocentesIdUtilizador = table.Column<int>(type: "int", nullable: false),
+                    UCsLecionadasIdUC = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UCUtilizador", x => new { x.DocentesIdUtilizador, x.UCsLecionadasIdUC });
+                    table.ForeignKey(
+                        name: "FK_UCUtilizador_UCs_UCsLecionadasIdUC",
+                        column: x => x.UCsLecionadasIdUC,
+                        principalTable: "UCs",
+                        principalColumn: "IdUC",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UCUtilizador_Utilizadores_DocentesIdUtilizador",
+                        column: x => x.DocentesIdUtilizador,
                         principalTable: "Utilizadores",
                         principalColumn: "IdUtilizador",
                         onDelete: ReferentialAction.Cascade);
@@ -420,9 +420,9 @@ namespace Backend.Migrations
                 column: "EscolaFK");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Turmas_DisciplinaFK",
+                name: "IX_Turmas_CursoFK",
                 table: "Turmas",
-                column: "DisciplinaFK");
+                column: "CursoFK");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UCs_CursoFK",
@@ -477,10 +477,10 @@ namespace Backend.Migrations
                 name: "Turmas");
 
             migrationBuilder.DropTable(
-                name: "Utilizadores");
+                name: "UCs");
 
             migrationBuilder.DropTable(
-                name: "UCs");
+                name: "Utilizadores");
 
             migrationBuilder.DropTable(
                 name: "Cursos");

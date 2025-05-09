@@ -23,38 +23,37 @@ public class ApplicationDbContext : IdentityDbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<Turma>()
-            .HasOne(t => t.Disciplina)
-            .WithMany(uc => uc.Turmas)
-            .HasForeignKey(t => t.DisciplinaFK)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<Escola>()
-            .Property(e => e.Nome)
-            .IsRequired();
-
-        modelBuilder.Entity<Sala>()
-            .Property(s => s.Nome)
-            .IsRequired();
-
-        modelBuilder.Entity<UC>()
-            .Property(uc => uc.NomeUC)
-            .IsRequired();
-
-        modelBuilder.Entity<Utilizador>()
-            .Property(u => u.Nome)
-            .IsRequired();
-
+        // Configuração para evitar múltiplos caminhos de exclusão em cascata
         modelBuilder.Entity<BlocoHorario>()
             .HasOne(b => b.Turma)
             .WithMany(t => t.BlocosHorario)
             .HasForeignKey(b => b.TurmaFK)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Restrict); // Evita exclusão em cascata
+
+        modelBuilder.Entity<BlocoHorario>()
+            .HasOne(b => b.Professor)
+            .WithMany(p => p.BlocosHorario)
+            .HasForeignKey(b => b.ProfessorFK)
+            .OnDelete(DeleteBehavior.Restrict); // Evita exclusão em cascata
+
+        modelBuilder.Entity<BlocoHorario>()
+            .HasOne(b => b.Sala)
+            .WithMany(s => s.BlocosHorario)
+            .HasForeignKey(b => b.SalaFK)
+            .OnDelete(DeleteBehavior.Restrict); // Evita exclusão em cascata
 
         modelBuilder.Entity<BlocoHorario>()
             .HasOne(b => b.UnidadeCurricular)
             .WithMany()
             .HasForeignKey(b => b.UnidadeCurricularFK)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Restrict); // Evita exclusão em cascata
+
+        // Configuração para outras entidades, se necessário
+        modelBuilder.Entity<Turma>()
+            .HasOne(t => t.Curso)
+            .WithMany()
+            .HasForeignKey(t => t.CursoFK)
+            .OnDelete(DeleteBehavior.Restrict); // Evita exclusão em cascata
     }
 }
+

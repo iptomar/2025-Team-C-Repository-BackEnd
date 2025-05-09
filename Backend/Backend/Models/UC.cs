@@ -22,11 +22,6 @@ namespace Backend.Models
         /// </summary>
         public ICollection<Utilizador> Docentes { get; set; } = new List<Utilizador>();
 
-        /// <summary>
-        /// Lista das turmas desta disciplina
-        /// </summary>
-        public ICollection<Turma> Turmas { get; set; } = new List<Turma>();
-
         // FK para referenciar o curso da disciplina
         [ForeignKey(nameof(Curso))]
         [DisplayName("Curso")]

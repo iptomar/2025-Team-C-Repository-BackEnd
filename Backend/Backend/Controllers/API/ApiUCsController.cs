@@ -143,13 +143,6 @@ namespace Backend.Controllers.API
             if (uc == null)
                 return NotFound();
 
-            // Verificar se existem turmas associadas à UC
-            var temTurmas = await _context.Turmas
-                .AnyAsync(t => t.DisciplinaFK == id);
-
-            if (temTurmas)
-                return BadRequest(new { message = "Não é possível excluir esta disciplina pois existem turmas associadas a ela" });
-
             // Verificar se existem blocos de horário associados à UC
             var temBlocosHorario = await _context.BlocosHorario
                 .AnyAsync(b => b.UnidadeCurricularFK == id);

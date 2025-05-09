@@ -1,5 +1,4 @@
-﻿using Backend.Data;
-using Backend.Models;
+﻿using Backend.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -11,313 +10,382 @@ namespace Backend.Data
 {
     public static class DbInitializer
     {
-        public static async Task InitializeAsync(
-            ApplicationDbContext context,
-            UserManager<IdentityUser> userManager,
-            RoleManager<IdentityRole> roleManager)
+        /// <summary>
+        /// Inicializa a base de dados com dados de teste
+        /// </summary>
+        public static async Task InitializeAsync(ApplicationDbContext context, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
-            // Garante que a base de dados está criada
-            context.Database.EnsureCreated();
+            // Garante que a base de dados existe e aplica migrações pendentes
+            context.Database.Migrate();
 
-            // Verifica se a base de dados já tem dados
-            if (!roleManager.Roles.Any())
+            // Verifica se já existem dados na base de dados
+            if (context.Utilizadores.Any())
             {
-                await CreateRolesAsync(roleManager);
+                return; // A base de dados já foi inicializada
             }
 
-            if (!userManager.Users.Any())
-            {
-                await CreateUsersAsync(userManager, context);
-            }
+            // Criar roles necessárias
+            await CriarRolesAsync(roleManager);
 
-            if (!context.Escolas.Any())
-            {
-                await CreateEscolasAsync(context);
-            }
+            // Criar utilizadores de teste
+            await CriarUtilizadoresTesteAsync(context, userManager);
 
-            if (!context.Salas.Any())
-            {
-                await CreateSalasAsync(context);
-            }
-
-            if (!context.Cursos.Any())
-            {
-                await CreateCursosAsync(context);
-            }
-
-            if (!context.UCs.Any())
-            {
-                await CreateUCsAsync(context);
-            }
-
-            if (!context.Turmas.Any())
-            {
-                await CreateTurmasAsync(context);
-            }
-
-            if (!context.BlocosHorario.Any())
-            {
-                await CreateBlocosHorarioAsync(context);
-            }
-
+            // Criar escolas
+            var escolas = CriarEscolas();
+            await context.Escolas.AddRangeAsync(escolas);
             await context.SaveChangesAsync();
-            // *************************************
+
+            // Criar salas
+            var salas = CriarSalas(escolas);
+            await context.Salas.AddRangeAsync(salas);
+            await context.SaveChangesAsync();
+
+            // Criar cursos
+            var cursos = CriarCursos(escolas);
+            await context.Cursos.AddRangeAsync(cursos);
+            await context.SaveChangesAsync();
+
+            // Criar UCs
+            var ucs = CriarUCs(cursos);
+            await context.UCs.AddRangeAsync(ucs);
+            await context.SaveChangesAsync();
+
+            // Atribuir UCs aos docentes
+            await AtribuirUCsAosDocentesAsync(context, ucs);
+
+            // Criar turmas
+            var turmas = CriarTurmas(cursos);
+            await context.Turmas.AddRangeAsync(turmas);
+            await context.SaveChangesAsync();
+
+            // Criar blocos de horário
+            var blocos = CriarBlocosHorario(context);
+            await context.BlocosHorario.AddRangeAsync(blocos);
+            await context.SaveChangesAsync();
         }
 
-        // Criar roles na base de dados
-        private static async Task CreateRolesAsync(RoleManager<IdentityRole> roleManager)
+        /// <summary>
+        /// Cria as roles necessárias no sistema
+        /// </summary>
+        private static async Task CriarRolesAsync(RoleManager<IdentityRole> roleManager)
         {
             string[] roleNames = { "Administrador", "MembroComissao", "Docente" };
 
             foreach (var roleName in roleNames)
             {
-                await roleManager.CreateAsync(new IdentityRole(roleName));
+                if (!await roleManager.RoleExistsAsync(roleName))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(roleName));
+                }
             }
         }
 
-        // Criar utilizadores na base de dados
-        private static async Task CreateUsersAsync(
-            UserManager<IdentityUser> userManager,
-            ApplicationDbContext context)
+        /// <summary>
+        /// Cria utilizadores de teste para cada tipo de perfil
+        /// </summary>
+        private static async Task CriarUtilizadoresTesteAsync(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
-            // Cria o utilizador administrador
-            var adminUser = new IdentityUser
-            {
-                UserName = "admin@example.com",
-                Email = "admin@example.com",
-                EmailConfirmed = true
-            };
-            await userManager.CreateAsync(adminUser, "Admin123!");
-            await userManager.AddToRoleAsync(adminUser, "Administrador");
+            // Criar administrador
+            await CriarUtilizadorAsync(context, userManager, "admin@ipt.pt", "Admin123!", "Administrador", "Administrador do Sistema");
 
-            // Cria um membro da comissão
-            var commissionUser = new IdentityUser
-            {
-                UserName = "comissao@example.com",
-                Email = "comissao@example.com",
-                EmailConfirmed = true
-            };
-            await userManager.CreateAsync(commissionUser, "Comissao123!");
-            await userManager.AddToRoleAsync(commissionUser, "MembroComissao");
+            // Criar membro da comissão
+            await CriarUtilizadorAsync(context, userManager, "comissao@ipt.pt", "Comissao123!", "MembroComissao", "Membro da Comissão");
 
-            // Cria um conjunto de professores
-            var professors = new[]
-            {
-                new { Email = "joao.silva@example.com", Name = "João Silva" },
-                new { Email = "maria.santos@example.com", Name = "Maria Santos" },
-                new { Email = "antonio.pereira@example.com", Name = "António Pereira" },
-                new { Email = "ana.costa@example.com", Name = "Ana Costa" }
-            };
+            // Criar docentes
+            await CriarUtilizadorAsync(context, userManager, "joaosilva@ipt.pt", "Docente123!", "Docente", "João Silva", "Professor Adjunto");
+            await CriarUtilizadorAsync(context, userManager, "marialopes@ipt.pt", "Docente123!", "Docente", "Maria Lopes", "Professor Auxiliar");
+            await CriarUtilizadorAsync(context, userManager, "antonioferreira@ipt.pt", "Docente123!", "Docente", "António Ferreira", "Professor Catedrático");
+            await CriarUtilizadorAsync(context, userManager, "anasantos@ipt.pt", "Docente123!", "Docente", "Ana Santos", "Assistente");
+            await CriarUtilizadorAsync(context, userManager, "pedrooliveira@ipt.pt", "Docente123!", "Docente", "Pedro Oliveira", "Professor Associado");
+        }
 
-            // Adiciona os professores à base de dados (Identity)
-            foreach (var professor in professors)
+        /// <summary>
+        /// Cria um utilizador no Identity e na tabela Utilizadores
+        /// </summary>
+        private static async Task CriarUtilizadorAsync(
+            ApplicationDbContext context,
+            UserManager<IdentityUser> userManager,
+            string email,
+            string password,
+            string role,
+            string nome,
+            string categoria = null)
+        {
+            // Verificar se o utilizador já existe
+            var user = await userManager.FindByEmailAsync(email);
+
+            if (user == null)
             {
-                var user = new IdentityUser
+                // Criar utilizador para o Identity
+                user = new IdentityUser
                 {
-                    UserName = professor.Email,
-                    Email = professor.Email,
+                    UserName = email,
+                    Email = email,
                     EmailConfirmed = true
                 };
-                await userManager.CreateAsync(user, "Docente123!");
-                await userManager.AddToRoleAsync(user, "Docente");
 
-                // Adiciona os professores à tabela Utilizadores
+                await userManager.CreateAsync(user, password);
+                await userManager.AddToRoleAsync(user, role);
+
+                // Criar utilizador na tabela Utilizadores
                 var utilizador = new Utilizador
                 {
-                    Nome = professor.Name,
-                    Email = professor.Email,
-                    Funcao = "Docente",
-                    UserId = user.Id,
-                    Categoria = "Professor Adjunto"
+                    Nome = nome,
+                    Email = email,
+                    Funcao = role,
+                    Categoria = categoria,
+                    UserId = user.Id
                 };
-                context.Utilizadores.Add(utilizador);
+
+                if (!string.IsNullOrEmpty(categoria))
+                {
+                    // Definir CategoriaId para docentes com base na categoria
+                    switch (categoria)
+                    {
+                        case "Professor Adjunto": utilizador.CategoriaId = 1; break;
+                        case "Professor Auxiliar": utilizador.CategoriaId = 2; break;
+                        case "Professor Catedrático": utilizador.CategoriaId = 3; break;
+                        case "Assistente": utilizador.CategoriaId = 4; break;
+                        case "Professor Associado": utilizador.CategoriaId = 5; break;
+                        default: utilizador.CategoriaId = null; break;
+                    }
+                }
+
+                await context.Utilizadores.AddAsync(utilizador);
+                await context.SaveChangesAsync();
             }
-
-            // Adiciona o utilizador administrador à tabela Utilizadores
-            context.Utilizadores.Add(new Utilizador
-            {
-                Nome = "Administrador Sistema",
-                Email = "admin@example.com",
-                Funcao = "Administrador",
-                UserId = adminUser.Id
-            });
-
-            // Adiciona o membro da comissão à tabela Utilizadores
-            context.Utilizadores.Add(new Utilizador
-            {
-                Nome = "Membro da Comissão",
-                Email = "comissao@example.com",
-                Funcao = "MembroComissao",
-                UserId = commissionUser.Id
-            });
         }
 
-        // Criar escolas na base de dados
-        private static async Task CreateEscolasAsync(ApplicationDbContext context)
+        /// <summary>
+        /// Cria escolas de teste
+        /// </summary>
+        private static List<Escola> CriarEscolas()
         {
-            var escolas = new List<Escola>
+            return new List<Escola>
             {
                 new Escola { Nome = "Escola Superior de Tecnologia de Tomar", Localizacao = "Tomar" },
                 new Escola { Nome = "Escola Superior de Gestão de Tomar", Localizacao = "Tomar" },
                 new Escola { Nome = "Escola Superior de Tecnologia de Abrantes", Localizacao = "Abrantes" }
             };
-
-            await context.Escolas.AddRangeAsync(escolas);
         }
 
-        // Criar salas na base de dados
-        private static async Task CreateSalasAsync(ApplicationDbContext context)
+        /// <summary>
+        /// Cria salas de teste para cada escola
+        /// </summary>
+        private static List<Sala> CriarSalas(List<Escola> escolas)
         {
-            // Buscar escolas para associar as salas
-            var escolas = await context.Escolas.ToListAsync();
-            if (!escolas.Any()) return;
-
-            // Criar uma lista de salas
             var salas = new List<Sala>();
 
-            // Criar salas para cada escola
-            foreach (var escola in escolas)
+            // Salas para ESTT
+            var estt = escolas[0];
+            salas.AddRange(new List<Sala>
             {
-                for (int i = 1; i <= 5; i++)
+                new Sala { Nome = "B207", Lugares = 30, TipoSala = "Laboratório", Localizacao = "Tomar", EscolaFK = estt.IdEscola },
+                new Sala { Nome = "B201", Lugares = 40, TipoSala = "Sala de Aula", Localizacao = "Tomar", EscolaFK = estt.IdEscola },
+                new Sala { Nome = "A204", Lugares = 60, TipoSala = "Auditório", Localizacao = "Tomar", EscolaFK = estt.IdEscola },
+                new Sala { Nome = "C106", Lugares = 25, TipoSala = "Laboratório", Localizacao = "Tomar", EscolaFK = estt.IdEscola },
+            });
+
+            // Salas para ESGT
+            var esgt = escolas[1];
+            salas.AddRange(new List<Sala>
+            {
+                new Sala { Nome = "G104", Lugares = 35, TipoSala = "Sala de Aula", Localizacao = "Tomar", EscolaFK = esgt.IdEscola },
+                new Sala { Nome = "G202", Lugares = 50, TipoSala = "Sala de Aula", Localizacao = "Tomar", EscolaFK = esgt.IdEscola },
+                new Sala { Nome = "G301", Lugares = 70, TipoSala = "Auditório", Localizacao = "Tomar", EscolaFK = esgt.IdEscola },
+            });
+
+            // Salas para ESTA
+            var esta = escolas[2];
+            salas.AddRange(new List<Sala>
+            {
+                new Sala { Nome = "LE1", Lugares = 25, TipoSala = "Laboratório", Localizacao = "Abrantes", EscolaFK = esta.IdEscola },
+                new Sala { Nome = "B102", Lugares = 40, TipoSala = "Sala de Aula", Localizacao = "Abrantes", EscolaFK = esta.IdEscola },
+                new Sala { Nome = "A005", Lugares = 60, TipoSala = "Auditório", Localizacao = "Abrantes", EscolaFK = esta.IdEscola },
+            });
+
+            return salas;
+        }
+
+        /// <summary>
+        /// Cria cursos de teste para cada escola
+        /// </summary>
+        private static List<Curso> CriarCursos(List<Escola> escolas)
+        {
+            var cursos = new List<Curso>();
+
+            // Cursos para ESTT
+            var estt = escolas[0];
+            cursos.AddRange(new List<Curso>
+            {
+                new Curso { Nome = "Engenharia Informática", Grau = "Licenciatura", EscolaFK = estt.IdEscola },
+                new Curso { Nome = "Tecnologias de Informação e Comunicação", Grau = "Licenciatura", EscolaFK = estt.IdEscola },
+                new Curso { Nome = "Design e Tecnologia das Artes Gráficas", Grau = "Licenciatura", EscolaFK = estt.IdEscola },
+            });
+
+            // Cursos para ESGT
+            var esgt = escolas[1];
+            cursos.AddRange(new List<Curso>
+            {
+                new Curso { Nome = "Gestão de Empresas", Grau = "Licenciatura", EscolaFK = esgt.IdEscola },
+                new Curso { Nome = "Gestão de Recursos Humanos", Grau = "Licenciatura", EscolaFK = esgt.IdEscola },
+            });
+
+            // Cursos para ESTA
+            var esta = escolas[2];
+            cursos.AddRange(new List<Curso>
+            {
+                new Curso { Nome = "Engenharia Mecânica", Grau = "Licenciatura", EscolaFK = esta.IdEscola },
+                new Curso { Nome = "Tecnologia e Gestão Industrial", Grau = "Licenciatura", EscolaFK = esta.IdEscola },
+            });
+
+            return cursos;
+        }
+
+        /// <summary>
+        /// Cria UCs de teste
+        /// </summary>
+        private static List<UC> CriarUCs(List<Curso> cursos)
+        {
+            var ucs = new List<UC>();
+
+            // UCs para Engenharia Informática
+            var ei = cursos[0];
+            ucs.AddRange(new List<UC>
+            {
+                new UC { NomeUC = "Programação Orientada a Objetos", TipoUC = "Teórico-prática", GrauAcademico = "Licenciatura", Semestre = "1º", Ano = 2, CursoFK = ei.IdCurso },
+                new UC { NomeUC = "Bases de Dados", TipoUC = "Teórico-prática", GrauAcademico = "Licenciatura", Semestre = "1º", Ano = 2, CursoFK = ei.IdCurso },
+                new UC { NomeUC = "Sistemas Operativos", TipoUC = "Teórico-prática", GrauAcademico = "Licenciatura", Semestre = "1º", Ano = 2, CursoFK = ei.IdCurso },
+                new UC { NomeUC = "Desenvolvimento Web", TipoUC = "Teórico-prática", GrauAcademico = "Licenciatura", Semestre = "2º", Ano = 2, CursoFK = ei.IdCurso },
+                new UC { NomeUC = "Inteligência Artificial", TipoUC = "Teórico-prática", GrauAcademico = "Licenciatura", Semestre = "1º", Ano = 3, CursoFK = ei.IdCurso },
+            });
+
+            // UCs para Gestão de Empresas
+            var ge = cursos[3];
+            ucs.AddRange(new List<UC>
+            {
+                new UC { NomeUC = "Contabilidade", TipoUC = "Teórica", GrauAcademico = "Licenciatura", Semestre = "1º", Ano = 1, CursoFK = ge.IdCurso },
+                new UC { NomeUC = "Marketing", TipoUC = "Teórico-prática", GrauAcademico = "Licenciatura", Semestre = "2º", Ano = 2, CursoFK = ge.IdCurso },
+            });
+
+            // UCs para Engenharia Mecânica
+            var em = cursos[5];
+            ucs.AddRange(new List<UC>
+            {
+                new UC { NomeUC = "Desenho Técnico", TipoUC = "Prática", GrauAcademico = "Licenciatura", Semestre = "2º", Ano = 1, CursoFK = em.IdCurso },
+                new UC { NomeUC = "Sistemas Digitais", TipoUC = "Teórico-prática", GrauAcademico = "Licenciatura", Semestre = "1º", Ano = 1, CursoFK = em.IdCurso },
+            });
+
+            return ucs;
+        }
+
+        /// <summary>
+        /// Atribui UCs aos docentes
+        /// </summary>
+        private static async Task AtribuirUCsAosDocentesAsync(ApplicationDbContext context, List<UC> ucs)
+        {
+            var docentes = await context.Utilizadores
+                .Where(u => u.Funcao == "Docente")
+                .ToListAsync();
+
+            if (!docentes.Any()) return;
+
+            // Atribuir UCs aos docentes de forma distribuída
+            for (int i = 0; i < ucs.Count; i++)
+            {
+                var docente = docentes[i % docentes.Count];
+
+                if (docente.UCsLecionadas == null)
                 {
-                    salas.Add(new Sala
-                    {
-                        Nome = $"Sala {i:D2}",
-                        Lugares = 30 + (i * 5),
-                        TipoSala = i % 3 == 0 ? "Laboratório" : "Sala de aula",
-                        Localizacao = escola.Localizacao,
-                        EscolaFK = escola.IdEscola,
-                        Escola = escola
-                    });
+                    docente.UCsLecionadas = new List<UC>();
                 }
+
+                docente.UCsLecionadas.Add(ucs[i]);
             }
 
-            await context.Salas.AddRangeAsync(salas);
-        }
-
-        // Criar cursos na base de dados
-        private static async Task CreateCursosAsync(ApplicationDbContext context)
-        {
-            var escolas = await context.Escolas.ToListAsync();
-            if (!escolas.Any()) return;
-
-            var cursos = new List<Curso>
-            {
-                new Curso { Nome = "Engenharia Informática", Grau = "Licenciatura", EscolaFK = escolas[0].IdEscola },
-                new Curso { Nome = "Gestão de Empresas", Grau = "Licenciatura", EscolaFK = escolas[1].IdEscola },
-                new Curso { Nome = "Design e Tecnologia das Artes Gráficas", Grau = "Licenciatura", EscolaFK = escolas[0].IdEscola },
-                new Curso { Nome = "Tecnologias de Informação e Comunicação", Grau = "Licenciatura", EscolaFK = escolas[2].IdEscola },
-                new Curso { Nome = "Engenharia Informática - Internet das Coisas", Grau = "Mestrado", EscolaFK = escolas[0].IdEscola }
-            };
-
-            await context.Cursos.AddRangeAsync(cursos);
             await context.SaveChangesAsync();
         }
 
-        // Criar unidades curriculares (UCs) na base de dados
-        private static async Task CreateUCsAsync(ApplicationDbContext context)
+        /// <summary>
+        /// Cria turmas de teste para os cursos
+        /// </summary>
+        private static List<Turma> CriarTurmas(List<Curso> cursos)
         {
-            var cursos = await context.Cursos.ToListAsync();
-            if (!cursos.Any()) return;
-
-            var ucs = new List<UC>
-            {
-                new UC { NomeUC = "Programação", TipoUC = "Obrigatória", GrauAcademico = "Licenciatura",
-                    Tipologia = "Teórico-prática", Semestre = "1º", Ano = 1, CursoFK = cursos[0].IdCurso },
-
-                new UC { NomeUC = "Base de Dados", TipoUC = "Obrigatória", GrauAcademico = "Licenciatura",
-                    Tipologia = "Teórico-prática", Semestre = "1º", Ano = 2, CursoFK = cursos[0].IdCurso },
-
-                new UC { NomeUC = "Redes de Computadores", TipoUC = "Obrigatória", GrauAcademico = "Licenciatura",
-                    Tipologia = "Teórico-prática", Semestre = "2º", Ano = 2, CursoFK = cursos[0].IdCurso },
-
-                new UC { NomeUC = "Gestão Financeira", TipoUC = "Obrigatória", GrauAcademico = "Licenciatura",
-                    Tipologia = "Teórica", Semestre = "1º", Ano = 1, CursoFK = cursos[1].IdCurso },
-
-                new UC { NomeUC = "IoT Fundamentals", TipoUC = "Obrigatória", GrauAcademico = "Mestrado",
-                    Tipologia = "Teórico-prática", Semestre = "1º", Ano = 1, CursoFK = cursos[4].IdCurso }
-            };
-
-            await context.UCs.AddRangeAsync(ucs);
-            await context.SaveChangesAsync();
-        }
-
-        // Criar turmas na base de dados
-        private static async Task CreateTurmasAsync(ApplicationDbContext context)
-        {
-            var ucs = await context.UCs.Include(u => u.Curso).ToListAsync();
-            if (!ucs.Any()) return;
-
             var turmas = new List<Turma>();
 
-            foreach (var uc in ucs)
+            foreach (var curso in cursos)
             {
-                // Criar turmas para cada unidade curricular
-                for (char letra = 'A'; letra <= 'B'; letra++)
+                // Criar turmas para cada curso
+                turmas.AddRange(new List<Turma>
                 {
-                    turmas.Add(new Turma
-                    {
-                        Nome = $"Turma {letra}",
-                        DisciplinaFK = uc.IdUC,
-                        Disciplina = uc,
-                        CursoFK = uc.CursoFK,
-                        Curso = uc.Curso
-                    });
-                }
+                    new Turma { Nome = $"{curso.Nome} - Turma A", CursoFK = curso.IdCurso },
+                    new Turma { Nome = $"{curso.Nome} - Turma B", CursoFK = curso.IdCurso }
+                });
             }
 
-            await context.Turmas.AddRangeAsync(turmas);
-            await context.SaveChangesAsync();
+            return turmas;
         }
 
-        // Criar blocos de horário na base de dados
-        private static async Task CreateBlocosHorarioAsync(ApplicationDbContext context)
+        /// <summary>
+        /// Cria blocos de horário de teste
+        /// </summary>
+        private static List<BlocoHorario> CriarBlocosHorario(ApplicationDbContext context)
         {
-            var professores = await context.Utilizadores.Where(u => u.Funcao == "Docente").ToListAsync();
-            var salas = await context.Salas.ToListAsync();
-            var turmas = await context.Turmas.ToListAsync();
+            var salas = context.Salas.ToList();
+            var docentes = context.Utilizadores.Where(u => u.Funcao == "Docente").ToList();
+            var ucs = context.UCs.ToList();
+            var turmas = context.Turmas.ToList();
 
-            if (!professores.Any() || !salas.Any() || !turmas.Any())
-                return;
-
-            var blocosHorario = new List<BlocoHorario>();
+            var blocos = new List<BlocoHorario>();
             var random = new Random();
 
-            // Criar blocos de horário para as turmas
-            foreach (var turma in turmas.Take(10))
+            // Data base para os horários (segunda-feira da próxima semana)
+            var dataBase = DateTime.Today.AddDays(((int)DayOfWeek.Monday - (int)DateTime.Today.DayOfWeek + 7) % 7);
+
+            // Criar blocos de horário para cada dia da semana (segunda a sexta)
+            for (int dia = 0; dia < 5; dia++)
             {
-                var professor = professores[random.Next(professores.Count)];
-                var sala = salas[random.Next(salas.Count)];
+                var dataAtual = DateOnly.FromDateTime(dataBase.AddDays(dia));
 
-                // Criar blocos de horário para cada dia da semana (2 blocos por dia)
-                for (int diaSemana = 1; diaSemana <= 5; diaSemana++)
+                // Criar blocos em horários de manhã e tarde
+                var horasInicio = new TimeSpan[] {
+                    new TimeSpan(8, 0, 0),
+                    new TimeSpan(10, 0, 0),
+                    new TimeSpan(14, 0, 0),
+                    new TimeSpan(16, 0, 0)
+                };
+
+                foreach (var horaInicio in horasInicio)
                 {
-                    // Calcular o dia da semana
-                    var hoje = DateOnly.FromDateTime(DateTime.Today);
-                    int diff = diaSemana - (int)hoje.DayOfWeek;
-                    var dia = hoje.AddDays(diff);
+                    // Cada bloco tem 2 horas
+                    var horaFim = horaInicio.Add(new TimeSpan(2, 0, 0));
 
-                    // Criar dois blocos de horário para cada dia
-                    blocosHorario.Add(new BlocoHorario
+                    // Selecionar aleatoriamente alguns docentes, UCs, salas e turmas para criar blocos
+                    for (int i = 0; i < 3; i++)
                     {
-                        HoraInicio = new TimeSpan(8 + random.Next(3), 0, 0),
-                        HoraFim = new TimeSpan(9 + random.Next(3), 30, 0),
-                        Dia = dia,
-                        ProfessorFK = professor.IdUtilizador,
-                        Professor = professor,
-                        UnidadeCurricularFK = turma.DisciplinaFK,
-                        UnidadeCurricular = turma.Disciplina,
-                        SalaFK = sala.IdSala,
-                        Sala = sala,
-                        TurmaFK = turma.IdTurma,
-                        Turma = turma
-                    });
+                        if (docentes.Count == 0 || ucs.Count == 0 || salas.Count == 0 || turmas.Count == 0)
+                            continue;
 
-                    diaSemana += random.Next(2);
+                        var docenteIndex = random.Next(docentes.Count);
+                        var ucIndex = random.Next(ucs.Count);
+                        var salaIndex = random.Next(salas.Count);
+                        var turmaIndex = random.Next(turmas.Count);
+
+                        blocos.Add(new BlocoHorario
+                        {
+                            HoraInicio = horaInicio,
+                            HoraFim = horaFim,
+                            Dia = dataAtual,
+                            ProfessorFK = docentes[docenteIndex].IdUtilizador,
+                            UnidadeCurricularFK = ucs[ucIndex].IdUC,
+                            SalaFK = salas[salaIndex].IdSala,
+                            TurmaFK = turmas[turmaIndex].IdTurma
+                        });
+                    }
                 }
             }
 
-            await context.BlocosHorario.AddRangeAsync(blocosHorario);
+            return blocos;
         }
     }
 }

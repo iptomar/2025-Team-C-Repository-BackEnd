@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250509165918_CursoTurma")]
-    partial class CursoTurma
+    [Migration("20250509183059_TurmaEdit")]
+    partial class TurmaEdit
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -151,17 +151,12 @@ namespace Backend.Migrations
                     b.Property<int>("CursoFK")
                         .HasColumnType("int");
 
-                    b.Property<int>("DisciplinaFK")
-                        .HasColumnType("int");
-
                     b.Property<string>("Nome")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("IdTurma");
 
                     b.HasIndex("CursoFK");
-
-                    b.HasIndex("DisciplinaFK");
 
                     b.ToTable("Turmas");
                 });
@@ -460,25 +455,25 @@ namespace Backend.Migrations
                     b.HasOne("Backend.Models.Utilizador", "Professor")
                         .WithMany("BlocosHorario")
                         .HasForeignKey("ProfessorFK")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Backend.Models.Sala", "Sala")
                         .WithMany("BlocosHorario")
                         .HasForeignKey("SalaFK")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Backend.Models.Turma", "Turma")
                         .WithMany("BlocosHorario")
                         .HasForeignKey("TurmaFK")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Backend.Models.UC", "UnidadeCurricular")
                         .WithMany()
                         .HasForeignKey("UnidadeCurricularFK")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Professor");
@@ -517,18 +512,10 @@ namespace Backend.Migrations
                     b.HasOne("Backend.Models.Curso", "Curso")
                         .WithMany()
                         .HasForeignKey("CursoFK")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Backend.Models.UC", "Disciplina")
-                        .WithMany("Turmas")
-                        .HasForeignKey("DisciplinaFK")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Curso");
-
-                    b.Navigation("Disciplina");
                 });
 
             modelBuilder.Entity("Backend.Models.UC", b =>
@@ -635,11 +622,6 @@ namespace Backend.Migrations
             modelBuilder.Entity("Backend.Models.Turma", b =>
                 {
                     b.Navigation("BlocosHorario");
-                });
-
-            modelBuilder.Entity("Backend.Models.UC", b =>
-                {
-                    b.Navigation("Turmas");
                 });
 
             modelBuilder.Entity("Backend.Models.Utilizador", b =>

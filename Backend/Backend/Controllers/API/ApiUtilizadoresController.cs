@@ -172,6 +172,8 @@ namespace Backend.Controllers.API
         /// Retorna todos os utilizadores com função de Docente.
         /// </summary>
         /// <returns>Lista de docentes</returns>
+
+        // TO-DO: Rever este método, pois não está a devolver os docentes
         [HttpGet]
         [Route("GetDocentes")]
         public async Task<ActionResult<IEnumerable<UtilizadorDTO>>> GetDocentes()

@@ -12,7 +12,7 @@ namespace Backend.Models
 
         public int Lugares { get; set; }
 
-        public string TipoSala { get; set; } = string.Empty;
+        public string TipoSala { get; set; } = string.Empty; // laboratório, sala de aula, auditório, etc.
 
         public string Localizacao { get; set; } = string.Empty;
 

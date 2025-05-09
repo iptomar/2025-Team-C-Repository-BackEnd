@@ -7,7 +7,7 @@ namespace Backend.Models
     {
         [Key]
         public int IdTurma { get; set; }
-        public string Nome { get; set; } = string.Empty;
+        public string Nome { get; set; } = string.Empty; // Turma 1, Turma A, etc.
 
         // FK para referenciar a disciplina da turma
         [ForeignKey(nameof(Disciplina))]

@@ -41,9 +41,9 @@ namespace Backend.Data
             // Adicionar users
             var utilizadores = new Utilizador[]
             {
-                new Utilizador { Nome = "João Silva", Email = "joao.silva@ipt.pt", Funcao = "Docente", Categoria = "Professor Adjunto", EscolaFK = escolas[0].IdEscola },
-                new Utilizador { Nome = "Ana Costa", Email = "ana.costa@ipt.pt", Funcao = "Docente", Categoria = "Professor Auxiliar", EscolaFK = escolas[1].IdEscola },
-                new Utilizador { Nome = "Carlos Santos", Email = "carlos.santos@ipt.pt", Funcao = "Docente", Categoria = "Professor Catedrático", EscolaFK = escolas[2].IdEscola },
+                new Utilizador { Nome = "João Silva", Email = "joao.silva@ipt.pt", Funcao = "Docente", EscolaFK = escolas[0].IdEscola },
+                new Utilizador { Nome = "Ana Costa", Email = "ana.costa@ipt.pt", Funcao = "Docente", EscolaFK = escolas[1].IdEscola },
+                new Utilizador { Nome = "Carlos Santos", Email = "carlos.santos@ipt.pt", Funcao = "Docente", EscolaFK = escolas[2].IdEscola },
                 new Utilizador { Nome = "Maria Lopes", Email = "maria.lopes@ipt.pt", Funcao = "MembroComissao", EscolaFK = escolas[0].IdEscola },
                 new Utilizador { Nome = "António Ferreira", Email = "antonio.ferreira@ipt.pt", Funcao = "Administrador" }
             };
@@ -64,10 +64,10 @@ namespace Backend.Data
             // Adicionar cursos
             var ucs = new UC[]
             {
-                new UC { NomeDisciplina = "Programação", TipoDisciplina = "Teórica/Prática", GrauAcademico = "Licenciatura", Tipologia = "Teórica", Semestre = "1º Semestre" },
-                new UC { NomeDisciplina = "Algoritmos", TipoDisciplina = "Teórica", GrauAcademico = "Licenciatura", Tipologia = "Teórica", Semestre = "1º Semestre" },
-                new UC { NomeDisciplina = "Bases de Dados", TipoDisciplina = "Prática", GrauAcademico = "Licenciatura", Tipologia = "Laboratorial", Semestre = "2º Semestre" },
-                new UC { NomeDisciplina = "Sistemas de Informação", TipoDisciplina = "Teórica/Prática", GrauAcademico = "Mestrado", Tipologia = "Teórica", Semestre = "2º Semestre" }
+                new UC { NomeDisciplina = "Programação", TipoDisciplina = "Teórica/Prática", GrauAcademico = "Licenciatura", Semestre = "1º Semestre" },
+                new UC { NomeDisciplina = "Algoritmos", TipoDisciplina = "Teórica", GrauAcademico = "Licenciatura", Semestre = "1º Semestre" },
+                new UC { NomeDisciplina = "Bases de Dados", TipoDisciplina = "Prática", GrauAcademico = "Licenciatura", Semestre = "2º Semestre" },
+                new UC { NomeDisciplina = "Sistemas de Informação", TipoDisciplina = "Teórica/Prática", GrauAcademico = "Mestrado", Semestre = "2º Semestre" }
             };
             context.UCs.AddRange(ucs);
             context.SaveChanges();

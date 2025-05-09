@@ -9,9 +9,7 @@ namespace Backend.Models
         public int IdUtilizador { get; set; }
         public string Nome { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-
-        // Funcão/Perfil: Administrador, MembroComissao, Docente
-        public string Funcao { get; set; } = string.Empty;
+        public string Funcao { get; set; } = string.Empty;         // Funcão/Perfil: Administrador, MembroComissao, Docente
 
         // Campos específicos para docentes
         public int? CategoriaId { get; set; }
@@ -40,6 +38,6 @@ namespace Backend.Models
         /// <summary>
         /// Atributo para fazer a ligação entre a base de dados "da aplicação" e a base de dados (default) do Identity
         /// </summary>
-        public string UserId { get; set; }
+        public string UserId { get; set; }  // Identity 
     }
 }

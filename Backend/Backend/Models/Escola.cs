@@ -12,7 +12,8 @@ namespace Backend.Models
         /// <summary>
         /// Lista dos membros da comissão de horários
         /// </summary>
-        public ICollection<Utilizador> MembrosComissaoHorarios { get; set; } = new List<Utilizador>();
+        public ICollection<Utilizador> MembrosComissaoHorarios { get; set; } = new List<Utilizador>(); //TODO: isto poderia ser a lista de todos os utilizadores de uma escola!?
+                                                                                                       // em vez de existir a lista das escolasOndeEnsina no utilizador?
 
         /// <summary>
         /// Lista das salas da escola

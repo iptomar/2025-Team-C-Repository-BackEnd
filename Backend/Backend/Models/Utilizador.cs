@@ -15,11 +15,6 @@ namespace Backend.Models
         public int? CategoriaId { get; set; }
         public string Categoria { get; set; }
 
-        // FK para a escola principal
-        //[ForeignKey(nameof(Escola))]
-        //public int? EscolaFK { get; set; }
-        //public Escola Escola { get; set; }
-
         /// <summary>
         /// Lista das UCs lecionadas (caso seja docente)
         /// </summary>

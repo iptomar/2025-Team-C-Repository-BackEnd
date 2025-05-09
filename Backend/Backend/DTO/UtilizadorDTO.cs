@@ -7,7 +7,5 @@
         public string Email { get; set; }
         public string Funcao { get; set; }
         public string Categoria { get; set; }
-        public int? EscolaFK { get; set; }
-        public string EscolaNome { get; set; }
     }
 }

@@ -119,6 +119,10 @@ namespace Backend.Controllers.API
                 PasswordVerificationResult passWorks = new PasswordHasher<IdentityUser>().VerifyHashedPassword(user, user.PasswordHash, password);
                 if (passWorks == PasswordVerificationResult.Success)
                 {
+                    // Buscar o utilizador na tabela Utilizadores
+                    var utilizador = await _context.Utilizadores.FirstOrDefaultAsync(u => u.UserId == user.Id);
+
+
                     // Obtém a lista de roles do utilizador
                     var roles = await _userManager.GetRolesAsync(user);
                     var claims = new List<Claim>
@@ -127,6 +131,12 @@ namespace Backend.Controllers.API
                         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                         new Claim(JwtRegisteredClaimNames.Email, user.Email)
                     };
+
+                    // Adiciona o utilizadorId como claim
+                    if (utilizador != null)
+                    {
+                        claims.Add(new Claim("utilizadorId", utilizador.IdUtilizador.ToString()));
+                    }
 
                     // Adiciona as roles como claims
                     foreach (var role in roles)

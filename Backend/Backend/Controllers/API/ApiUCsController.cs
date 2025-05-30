@@ -27,12 +27,14 @@ namespace Backend.Controllers.API
             var ucs = await _context.UCs
                 .Select(u => new UCDTO
                 {
-                    IdDisciplina = u.IdDisciplina,
-                    NomeDisciplina = u.NomeDisciplina,
-                    TipoDisciplina = u.TipoDisciplina,
+                    IdUC = u.IdUC,
+                    NomeUC = u.NomeUC,
+                    TipoUC = u.TipoUC,
                     GrauAcademico = u.GrauAcademico,
                     Tipologia = u.Tipologia,
-                    Semestre = u.Semestre
+                    Semestre = u.Semestre,
+                    Ano = u.Ano,
+                    CursoFK = u.CursoFK
                 })
                 .ToListAsync();
 
@@ -47,118 +49,24 @@ namespace Backend.Controllers.API
         public async Task<ActionResult<UCDTO>> GetById(int id)
         {
             var uc = await _context.UCs
-                .FirstOrDefaultAsync(u => u.IdDisciplina == id);
+                .FirstOrDefaultAsync(u => u.IdUC == id);
 
             if (uc == null)
                 return NotFound();
 
             var ucDTO = new UCDTO
             {
-                IdDisciplina = uc.IdDisciplina,
-                NomeDisciplina = uc.NomeDisciplina,
-                TipoDisciplina = uc.TipoDisciplina,
+                IdUC = uc.IdUC,
+                NomeUC = uc.NomeUC,
+                TipoUC = uc.TipoUC,
                 GrauAcademico = uc.GrauAcademico,
                 Tipologia = uc.Tipologia,
-                Semestre = uc.Semestre
+                Semestre = uc.Semestre,
+                Ano = uc.Ano,
+                CursoFK = uc.CursoFK
             };
 
             return Ok(ucDTO);
-        }
-
-        /// <summary>
-        /// Retorna unidades curriculares por semestre.
-        /// </summary>
-        [HttpGet]
-        [Route("GetBySemestre/{semestre}")]
-        public async Task<ActionResult<IEnumerable<UCDTO>>> GetBySemestre(string semestre)
-        {
-            var ucs = await _context.UCs
-                .Where(u => u.Semestre == semestre)
-                .Select(u => new UCDTO
-                {
-                    IdDisciplina = u.IdDisciplina,
-                    NomeDisciplina = u.NomeDisciplina,
-                    TipoDisciplina = u.TipoDisciplina,
-                    GrauAcademico = u.GrauAcademico,
-                    Tipologia = u.Tipologia,
-                    Semestre = u.Semestre
-                })
-                .ToListAsync();
-
-            return Ok(ucs);
-        }
-
-        /// <summary>
-        /// Retorna unidades curriculares por tipo de disciplina.
-        /// </summary>
-        [HttpGet]
-        [Route("GetByTipo/{tipo}")]
-        public async Task<ActionResult<IEnumerable<UCDTO>>> GetByTipo(string tipo)
-        {
-            var ucs = await _context.UCs
-                .Where(u => u.TipoDisciplina == tipo)
-                .Select(u => new UCDTO
-                {
-                    IdDisciplina = u.IdDisciplina,
-                    NomeDisciplina = u.NomeDisciplina,
-                    TipoDisciplina = u.TipoDisciplina,
-                    GrauAcademico = u.GrauAcademico,
-                    Tipologia = u.Tipologia,
-                    Semestre = u.Semestre
-                })
-                .ToListAsync();
-
-            return Ok(ucs);
-        }
-
-        /// <summary>
-        /// Retorna unidades curriculares por grau acadêmico.
-        /// </summary>
-        [HttpGet]
-        [Route("GetByGrau/{grau}")]
-        public async Task<ActionResult<IEnumerable<UCDTO>>> GetByGrau(string grau)
-        {
-            var ucs = await _context.UCs
-                .Where(u => u.GrauAcademico == grau)
-                .Select(u => new UCDTO
-                {
-                    IdDisciplina = u.IdDisciplina,
-                    NomeDisciplina = u.NomeDisciplina,
-                    TipoDisciplina = u.TipoDisciplina,
-                    GrauAcademico = u.GrauAcademico,
-                    Tipologia = u.Tipologia,
-                    Semestre = u.Semestre
-                })
-                .ToListAsync();
-
-            return Ok(ucs);
-        }
-
-        /// <summary>
-        /// Retorna unidades curriculares lecionadas por um determinado docente.
-        /// </summary>
-        [HttpGet]
-        [Route("GetByDocente/{docenteId}")]
-        public async Task<ActionResult<IEnumerable<UCDTO>>> GetByDocente(int docenteId)
-        {
-            var docente = await _context.Utilizadores
-                .Include(u => u.DisciplinasLecionadas)
-                .FirstOrDefaultAsync(u => u.IdUtilizador == docenteId && u.Funcao == "Docente");
-
-            if (docente == null)
-                return NotFound("Docente não encontrado");
-
-            var ucDTOs = docente.DisciplinasLecionadas.Select(d => new UCDTO
-            {
-                IdDisciplina = d.IdDisciplina,
-                NomeDisciplina = d.NomeDisciplina,
-                TipoDisciplina = d.TipoDisciplina,
-                GrauAcademico = d.GrauAcademico,
-                Tipologia = d.Tipologia,
-                Semestre = d.Semestre
-            }).ToList();
-
-            return Ok(ucDTOs);
         }
 
         /// <summary>
@@ -168,21 +76,23 @@ namespace Backend.Controllers.API
         [Route("Create")]
         public async Task<ActionResult<UCDTO>> Create([FromBody] UCDTO ucDTO)
         {
-            UC uc = new UC
+            var uc = new UC
             {
-                NomeDisciplina = ucDTO.NomeDisciplina,
-                TipoDisciplina = ucDTO.TipoDisciplina,
+                NomeUC = ucDTO.NomeUC,
+                TipoUC = ucDTO.TipoUC,
                 GrauAcademico = ucDTO.GrauAcademico,
                 Tipologia = ucDTO.Tipologia,
-                Semestre = ucDTO.Semestre
+                Semestre = ucDTO.Semestre,
+                Ano = ucDTO.Ano,
+                CursoFK = ucDTO.CursoFK
             };
 
             _context.UCs.Add(uc);
             await _context.SaveChangesAsync();
 
-            ucDTO.IdDisciplina = uc.IdDisciplina;
+            ucDTO.IdUC = uc.IdUC;
 
-            return CreatedAtAction(nameof(GetById), new { id = uc.IdDisciplina }, ucDTO);
+            return CreatedAtAction(nameof(GetById), new { id = uc.IdUC }, ucDTO);
         }
 
         /// <summary>
@@ -192,18 +102,20 @@ namespace Backend.Controllers.API
         [Route("Update/{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UCDTO ucDTO)
         {
-            if (id != ucDTO.IdDisciplina)
+            if (id != ucDTO.IdUC)
                 return BadRequest();
 
             var uc = await _context.UCs.FindAsync(id);
             if (uc == null)
                 return NotFound();
 
-            uc.NomeDisciplina = ucDTO.NomeDisciplina;
-            uc.TipoDisciplina = ucDTO.TipoDisciplina;
+            uc.NomeUC = ucDTO.NomeUC;
+            uc.TipoUC = ucDTO.TipoUC;
             uc.GrauAcademico = ucDTO.GrauAcademico;
             uc.Tipologia = ucDTO.Tipologia;
             uc.Semestre = ucDTO.Semestre;
+            uc.Ano = ucDTO.Ano;
+            uc.CursoFK = ucDTO.CursoFK;
 
             try
             {
@@ -211,7 +123,7 @@ namespace Backend.Controllers.API
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.UCs.Any(u => u.IdDisciplina == id))
+                if (!_context.UCs.Any(u => u.IdUC == id))
                     return NotFound();
                 else
                     throw;
@@ -231,16 +143,9 @@ namespace Backend.Controllers.API
             if (uc == null)
                 return NotFound();
 
-            // Verificar se existem turmas associadas à UC
-            var temTurmas = await _context.Turmas
-                .AnyAsync(t => t.DisciplinaFK == id);
-
-            if (temTurmas)
-                return BadRequest(new { message = "Não é possível excluir esta disciplina pois existem turmas associadas a ela" });
-
             // Verificar se existem blocos de horário associados à UC
             var temBlocosHorario = await _context.BlocosHorario
-                .AnyAsync(b => b.DisciplinaFK == id);
+                .AnyAsync(b => b.UnidadeCurricularFK == id);
 
             if (temBlocosHorario)
                 return BadRequest(new { message = "Não é possível excluir esta disciplina pois existem blocos de horário associados a ela" });
@@ -249,66 +154,6 @@ namespace Backend.Controllers.API
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        /// <summary>
-        /// Adiciona um docente a uma unidade curricular.
-        /// </summary>
-        [HttpPost]
-        [Route("AddDocente/{ucId}/{docenteId}")]
-        public async Task<IActionResult> AddDocente(int ucId, int docenteId)
-        {
-            var uc = await _context.UCs
-                .Include(u => u.Docentes)
-                .FirstOrDefaultAsync(u => u.IdDisciplina == ucId);
-
-            if (uc == null)
-                return NotFound("Disciplina não encontrada");
-
-            var docente = await _context.Utilizadores
-                .FirstOrDefaultAsync(u => u.IdUtilizador == docenteId && u.Funcao == "Docente");
-
-            if (docente == null)
-                return NotFound("Docente não encontrado");
-
-            if (uc.Docentes == null)
-                uc.Docentes = new List<Utilizador>();
-
-            if (!uc.Docentes.Any(d => d.IdUtilizador == docenteId))
-                uc.Docentes.Add(docente);
-
-            await _context.SaveChangesAsync();
-            return Ok();
-        }
-
-        /// <summary>
-        /// Remove um docente de uma unidade curricular.
-        /// </summary>
-        [HttpDelete]
-        [Route("RemoveDocente/{ucId}/{docenteId}")]
-        public async Task<IActionResult> RemoveDocente(int ucId, int docenteId)
-        {
-            var uc = await _context.UCs
-                .Include(u => u.Docentes)
-                .FirstOrDefaultAsync(u => u.IdDisciplina == ucId);
-
-            if (uc == null)
-                return NotFound("Disciplina não encontrada");
-
-            var docente = uc.Docentes?.FirstOrDefault(d => d.IdUtilizador == docenteId);
-            if (docente == null)
-                return NotFound("Docente não encontrado na disciplina");
-
-            // Verificar se existem blocos de horário associados a este docente nesta UC
-            var temBlocosHorario = await _context.BlocosHorario
-                .AnyAsync(b => b.DisciplinaFK == ucId && b.ProfessorFK == docenteId);
-
-            if (temBlocosHorario)
-                return BadRequest(new { message = "Não é possível remover este docente da disciplina pois existem blocos de horário associados" });
-
-            uc.Docentes.Remove(docente);
-            await _context.SaveChangesAsync();
-            return Ok();
         }
     }
 }

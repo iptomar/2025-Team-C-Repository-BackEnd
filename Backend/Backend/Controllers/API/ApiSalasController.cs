@@ -101,12 +101,10 @@ namespace Backend.Controllers.API
         [Route("Create")]
         public async Task<ActionResult<SalaDTO>> Create([FromBody] SalaDTO salaDTO)
         {
-            // Verificar se a escola existe
             var escola = await _context.Escolas.FindAsync(salaDTO.EscolaFK);
             if (escola == null)
                 return BadRequest(new { message = "Escola não encontrada" });
 
-            // Criar uma nova sala com os dados do DTO
             var sala = new Sala
             {
                 Nome = salaDTO.Nome,
@@ -119,7 +117,6 @@ namespace Backend.Controllers.API
             _context.Salas.Add(sala);
             await _context.SaveChangesAsync();
 
-            // Atualizar o DTO com o ID gerado
             salaDTO.IdSala = sala.IdSala;
             salaDTO.EscolaNome = escola.Nome;
 
@@ -136,17 +133,14 @@ namespace Backend.Controllers.API
             if (id != salaDTO.IdSala)
                 return BadRequest();
 
-            // Verificar se a escola existe
             var escola = await _context.Escolas.FindAsync(salaDTO.EscolaFK);
             if (escola == null)
                 return BadRequest(new { message = "Escola não encontrada" });
 
-            // Obter a sala existente
             var sala = await _context.Salas.FindAsync(id);
             if (sala == null)
                 return NotFound();
 
-            // Atualizar os dados da sala
             sala.Nome = salaDTO.Nome;
             sala.Lugares = salaDTO.Lugares;
             sala.TipoSala = salaDTO.TipoSala;
@@ -179,7 +173,6 @@ namespace Backend.Controllers.API
             if (sala == null)
                 return NotFound();
 
-            // Verificar se existem blocos de horário associados à sala
             var temBlocosHorario = await _context.BlocosHorario
                 .AnyAsync(b => b.SalaFK == id);
 
@@ -191,6 +184,5 @@ namespace Backend.Controllers.API
 
             return NoContent();
         }
-
     }
 }

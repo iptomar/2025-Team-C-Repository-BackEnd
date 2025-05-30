@@ -7,12 +7,12 @@ namespace Backend.Models
     {
         [Key]
         public int IdTurma { get; set; }
-        public string Nome { get; set; } = string.Empty;
+        public string Nome { get; set; } = string.Empty; // Turma 1, Turma A, etc.
 
-        // FK para referenciar a disciplina da turma
-        [ForeignKey(nameof(Disciplina))]
-        public int DisciplinaFK { get; set; }
-        public UC Disciplina { get; set; }
+        // FK para referenciar a curso da turma
+        [ForeignKey(nameof(Curso))]
+        public int CursoFK { get; set; }
+        public Curso Curso { get; set; }
 
         /// <summary>
         /// Lista dos blocos de horário associados a esta turma

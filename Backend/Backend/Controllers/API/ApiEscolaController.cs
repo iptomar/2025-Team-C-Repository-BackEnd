@@ -29,7 +29,8 @@ namespace Backend.Controllers.API
                 {
                     IdEscola = e.IdEscola,
                     Nome = e.Nome,
-                    Localizacao = e.Localizacao
+                    Localizacao = e.Localizacao,
+                    TotalSalas = e.Salas.Count
                 }).ToListAsync();
 
             return Ok(escolas);
@@ -42,7 +43,9 @@ namespace Backend.Controllers.API
         [Route("GetById/{id}")]
         public async Task<ActionResult<EscolaDTO>> GetById(int id)
         {
-            var escola = await _context.Escolas.FindAsync(id);
+            var escola = await _context.Escolas
+                .Include(e => e.Salas)
+                .FirstOrDefaultAsync(e => e.IdEscola == id);
 
             if (escola == null)
                 return NotFound();
@@ -51,7 +54,8 @@ namespace Backend.Controllers.API
             {
                 IdEscola = escola.IdEscola,
                 Nome = escola.Nome,
-                Localizacao = escola.Localizacao
+                Localizacao = escola.Localizacao,
+                TotalSalas = escola.Salas.Count
             };
 
             return Ok(dto);
@@ -62,12 +66,20 @@ namespace Backend.Controllers.API
         /// </summary>
         [HttpPost]
         [Route("Create")]
-        public async Task<ActionResult<Escola>> Create([FromBody] Escola escola)
+        public async Task<ActionResult<EscolaDTO>> Create([FromBody] EscolaDTO escolaDTO)
         {
+            var escola = new Escola
+            {
+                Nome = escolaDTO.Nome,
+                Localizacao = escolaDTO.Localizacao
+            };
+
             _context.Escolas.Add(escola);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetById), new { id = escola.IdEscola }, escola);
+            escolaDTO.IdEscola = escola.IdEscola;
+
+            return CreatedAtAction(nameof(GetById), new { id = escola.IdEscola }, escolaDTO);
         }
 
         /// <summary>
@@ -75,12 +87,17 @@ namespace Backend.Controllers.API
         /// </summary>
         [HttpPut]
         [Route("Update/{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Escola escola)
+        public async Task<IActionResult> Update(int id, [FromBody] EscolaDTO escolaDTO)
         {
-            if (id != escola.IdEscola)
+            if (id != escolaDTO.IdEscola)
                 return BadRequest();
 
-            _context.Entry(escola).State = EntityState.Modified;
+            var escola = await _context.Escolas.FindAsync(id);
+            if (escola == null)
+                return NotFound();
+
+            escola.Nome = escolaDTO.Nome;
+            escola.Localizacao = escolaDTO.Localizacao;
 
             try
             {
@@ -104,9 +121,16 @@ namespace Backend.Controllers.API
         [Route("Delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var escola = await _context.Escolas.FindAsync(id);
+            var escola = await _context.Escolas
+                .Include(e => e.Salas)
+                .FirstOrDefaultAsync(e => e.IdEscola == id);
+
             if (escola == null)
                 return NotFound();
+
+            // Verificar se existem salas associadas à escola
+            if (escola.Salas.Any())
+                return BadRequest(new { message = "Não é possível excluir esta escola pois existem salas associadas a ela" });
 
             _context.Escolas.Remove(escola);
             await _context.SaveChangesAsync();

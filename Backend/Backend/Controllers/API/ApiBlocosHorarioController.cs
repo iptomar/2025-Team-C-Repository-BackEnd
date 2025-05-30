@@ -47,21 +47,23 @@ namespace Backend.Controllers.API
         public async Task<ActionResult<IEnumerable<BlocoHorarioDTO>>> GetAll()
         {
             var blocos = await _context.BlocosHorario
-                .Include(b => b.Disciplina)
+                .Include(b => b.UnidadeCurricular)
                 .Include(b => b.Professor)
                 .Include(b => b.Sala)
-                .Include(b => b.Tipologia)
                 .Include(b => b.Turma)
                 .Select(b => new BlocoHorarioDTO
                 {
                     IdBloco = b.IdBloco,
                     HoraInicio = b.HoraInicio,
                     HoraFim = b.HoraFim,
-                    DiaSemana = b.DiaSemana,
+                    Dia = b.Dia,
+                    ProfessorFK = b.ProfessorFK,
                     ProfessorNome = b.Professor.Nome,
-                    DisciplinaNome = b.Disciplina.NomeDisciplina,
+                    UnidadeCurricularFK = b.UnidadeCurricularFK,
+                    UnidadeCurricularNome = b.UnidadeCurricular.NomeUC,
+                    SalaFK = b.SalaFK,
                     SalaNome = b.Sala.Nome,
-                    Tipologia = b.Tipologia.Tipologia,
+                    TurmaFK = b.TurmaFK,
                     TurmaNome = b.Turma.Nome
                 })
                 .ToListAsync();
@@ -74,15 +76,14 @@ namespace Backend.Controllers.API
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("{id}")]
+        [HttpGet]
         [Route("getById/{id}")]
         public async Task<ActionResult<BlocoHorarioDTO>> GetById(int id)
         {
             var bloco = await _context.BlocosHorario
-                .Include(b => b.Disciplina)
+                .Include(b => b.UnidadeCurricular)
                 .Include(b => b.Professor)
                 .Include(b => b.Sala)
-                .Include(b => b.Tipologia)
                 .Include(b => b.Turma)
                 .FirstOrDefaultAsync(b => b.IdBloco == id);
 
@@ -93,11 +94,14 @@ namespace Backend.Controllers.API
                 IdBloco = bloco.IdBloco,
                 HoraInicio = bloco.HoraInicio,
                 HoraFim = bloco.HoraFim,
-                DiaSemana = bloco.DiaSemana,
+                Dia = bloco.Dia,
+                ProfessorFK = bloco.ProfessorFK,
                 ProfessorNome = bloco.Professor.Nome,
-                DisciplinaNome = bloco.Disciplina.NomeDisciplina,
+                UnidadeCurricularFK = bloco.UnidadeCurricularFK,
+                UnidadeCurricularNome = bloco.UnidadeCurricular.NomeUC,
+                SalaFK = bloco.SalaFK,
                 SalaNome = bloco.Sala.Nome,
-                Tipologia = bloco.Tipologia.Tipologia,
+                TurmaFK = bloco.TurmaFK,
                 TurmaNome = bloco.Turma.Nome
             };
 
@@ -107,12 +111,24 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Cria um novo bloco de horário.
         /// </summary>
-        /// <param name="blocoHorario"></param>
+        /// <param name="blocoDTO">DTO com os dados do bloco horário</param>
         /// <returns></returns>
         [HttpPost]
         [Route("create")]
-        public async Task<IActionResult> Create([FromBody] BlocoHorario blocoHorario)
+        public async Task<IActionResult> Create([FromBody] BlocoHorarioDTO blocoDTO)
         {
+            // Converter DTO para modelo
+            var blocoHorario = new BlocoHorario
+            {
+                HoraInicio = blocoDTO.HoraInicio,
+                HoraFim = blocoDTO.HoraFim,
+                Dia = blocoDTO.Dia,
+                ProfessorFK = blocoDTO.ProfessorFK,
+                UnidadeCurricularFK = blocoDTO.UnidadeCurricularFK,
+                SalaFK = blocoDTO.SalaFK,
+                TurmaFK = blocoDTO.TurmaFK
+            };
+
             // Validar o bloco de horário
             var validacao = await _horarioValidator.ValidarBlocoHorario(blocoHorario);
             if (!validacao.isValid)
@@ -121,81 +137,96 @@ namespace Backend.Controllers.API
             _context.BlocosHorario.Add(blocoHorario);
             await _context.SaveChangesAsync();
 
-
-            // Carregar entidades relacionadas para criar o DTO
+            // Carregar entidades relacionadas para criar o DTO de resposta
             await _context.Entry(blocoHorario).Reference(b => b.Professor).LoadAsync();
-            await _context.Entry(blocoHorario).Reference(b => b.Disciplina).LoadAsync();
+            await _context.Entry(blocoHorario).Reference(b => b.UnidadeCurricular).LoadAsync();
             await _context.Entry(blocoHorario).Reference(b => b.Sala).LoadAsync();
-            await _context.Entry(blocoHorario).Reference(b => b.Tipologia).LoadAsync();
             await _context.Entry(blocoHorario).Reference(b => b.Turma).LoadAsync();
 
             // Criar DTO para enviar ao cliente
-            var blocoDTO = new BlocoHorarioDTO
+            var novoBlocoDTO = new BlocoHorarioDTO
             {
                 IdBloco = blocoHorario.IdBloco,
                 HoraInicio = blocoHorario.HoraInicio,
                 HoraFim = blocoHorario.HoraFim,
-                DiaSemana = blocoHorario.DiaSemana,
+                Dia = blocoHorario.Dia,
+                ProfessorFK = blocoHorario.ProfessorFK,
                 ProfessorNome = blocoHorario.Professor.Nome,
-                DisciplinaNome = blocoHorario.Disciplina.NomeDisciplina,
+                UnidadeCurricularFK = blocoHorario.UnidadeCurricularFK,
+                UnidadeCurricularNome = blocoHorario.UnidadeCurricular.NomeUC,
+                SalaFK = blocoHorario.SalaFK,
                 SalaNome = blocoHorario.Sala.Nome,
-                Tipologia = blocoHorario.Tipologia.Tipologia,
+                TurmaFK = blocoHorario.TurmaFK,
                 TurmaNome = blocoHorario.Turma.Nome
             };
 
             // Notificar os clientes conectados com os dados do bloco
-            await _hubContext.Clients.All.SendAsync("BlocoAdicionado", blocoDTO);
+            await _hubContext.Clients.All.SendAsync("BlocoAdicionado", novoBlocoDTO);
 
-            return CreatedAtAction(nameof(GetById), new { id = blocoHorario.IdBloco }, blocoDTO);
+            return CreatedAtAction(nameof(GetById), new { id = blocoHorario.IdBloco }, novoBlocoDTO);
         }
 
         /// <summary>
         /// Atualiza um bloco de horário existente.
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="blocoHorario"></param>
+        /// <param name="blocoDTO"></param>
         /// <returns></returns>
-        [HttpPut("{id}")]
+        [HttpPut]
         [Route("update/{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] BlocoHorario blocoHorario)
+        public async Task<IActionResult> Update(int id, [FromBody] BlocoHorarioDTO blocoDTO)
         {
-            if (id != blocoHorario.IdBloco)
+            if (id != blocoDTO.IdBloco)
                 return BadRequest();
 
+            // Verificar se o bloco existe
+            var blocoExistente = await _context.BlocosHorario.FindAsync(id);
+            if (blocoExistente == null)
+                return NotFound();
+
+            // Atualizar as propriedades
+            blocoExistente.HoraInicio = blocoDTO.HoraInicio;
+            blocoExistente.HoraFim = blocoDTO.HoraFim;
+            blocoExistente.Dia = blocoDTO.Dia;
+            blocoExistente.ProfessorFK = blocoDTO.ProfessorFK;
+            blocoExistente.UnidadeCurricularFK = blocoDTO.UnidadeCurricularFK;
+            blocoExistente.SalaFK = blocoDTO.SalaFK;
+            blocoExistente.TurmaFK = blocoDTO.TurmaFK;
+
             // Validar o bloco de horário
-            var validacao = await _horarioValidator.ValidarBlocoHorario(blocoHorario);
+            var validacao = await _horarioValidator.ValidarBlocoHorario(blocoExistente, id);
             if (!validacao.isValid)
                 return BadRequest(new { message = validacao.errorMessage });
-
-            _context.Entry(blocoHorario).State = EntityState.Modified;
 
             try
             {
                 await _context.SaveChangesAsync();
 
                 // Recarregar o bloco com suas relações
-                await _context.Entry(blocoHorario).Reference(b => b.Professor).LoadAsync();
-                await _context.Entry(blocoHorario).Reference(b => b.Disciplina).LoadAsync();
-                await _context.Entry(blocoHorario).Reference(b => b.Sala).LoadAsync();
-                await _context.Entry(blocoHorario).Reference(b => b.Tipologia).LoadAsync();
-                await _context.Entry(blocoHorario).Reference(b => b.Turma).LoadAsync();
+                await _context.Entry(blocoExistente).Reference(b => b.Professor).LoadAsync();
+                await _context.Entry(blocoExistente).Reference(b => b.UnidadeCurricular).LoadAsync();
+                await _context.Entry(blocoExistente).Reference(b => b.Sala).LoadAsync();
+                await _context.Entry(blocoExistente).Reference(b => b.Turma).LoadAsync();
 
                 // Criar DTO para enviar ao cliente
-                var blocoDTO = new BlocoHorarioDTO
+                var blocoAtualizadoDTO = new BlocoHorarioDTO
                 {
-                    IdBloco = blocoHorario.IdBloco,
-                    HoraInicio = blocoHorario.HoraInicio,
-                    HoraFim = blocoHorario.HoraFim,
-                    DiaSemana = blocoHorario.DiaSemana,
-                    ProfessorNome = blocoHorario.Professor.Nome,
-                    DisciplinaNome = blocoHorario.Disciplina.NomeDisciplina,
-                    SalaNome = blocoHorario.Sala.Nome,
-                    Tipologia = blocoHorario.Tipologia.Tipologia,
-                    TurmaNome = blocoHorario.Turma.Nome
+                    IdBloco = blocoExistente.IdBloco,
+                    HoraInicio = blocoExistente.HoraInicio,
+                    HoraFim = blocoExistente.HoraFim,
+                    Dia = blocoExistente.Dia,
+                    ProfessorFK = blocoExistente.ProfessorFK,
+                    ProfessorNome = blocoExistente.Professor.Nome,
+                    UnidadeCurricularFK = blocoExistente.UnidadeCurricularFK,
+                    UnidadeCurricularNome = blocoExistente.UnidadeCurricular.NomeUC,
+                    SalaFK = blocoExistente.SalaFK,
+                    SalaNome = blocoExistente.Sala.Nome,
+                    TurmaFK = blocoExistente.TurmaFK,
+                    TurmaNome = blocoExistente.Turma.Nome
                 };
 
                 // Notificar os clientes conectados
-                await _hubContext.Clients.All.SendAsync("BlocoEditado", blocoDTO);
+                await _hubContext.Clients.All.SendAsync("BlocoEditado", blocoAtualizadoDTO);
 
                 return NoContent();
             }
@@ -213,7 +244,7 @@ namespace Backend.Controllers.API
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpDelete("{id}")]
+        [HttpDelete]
         [Route("delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {

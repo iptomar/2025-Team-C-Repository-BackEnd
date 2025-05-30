@@ -52,7 +52,7 @@ namespace Backend.Controllers.API
 
         [HttpPost]
         [Route("createUser")]
-        public async Task<ActionResult<IdentityUser>> CreateUser([FromQuery] string role,[FromQuery] string email, [FromQuery] string password, [FromQuery] string nome)
+        public async Task<ActionResult<IdentityUser>> CreateUser([FromQuery] string role, [FromQuery] string email, [FromQuery] string password, [FromQuery] string nome)
         {
             // Criar um novo utilizador no AspNetUsers
             IdentityUser identityUser = new IdentityUser();
@@ -119,6 +119,10 @@ namespace Backend.Controllers.API
                 PasswordVerificationResult passWorks = new PasswordHasher<IdentityUser>().VerifyHashedPassword(user, user.PasswordHash, password);
                 if (passWorks == PasswordVerificationResult.Success)
                 {
+                    // Buscar o utilizador na tabela Utilizadores
+                    var utilizador = await _context.Utilizadores.FirstOrDefaultAsync(u => u.UserId == user.Id);
+
+
                     // Obtém a lista de roles do utilizador
                     var roles = await _userManager.GetRolesAsync(user);
                     var claims = new List<Claim>
@@ -127,6 +131,12 @@ namespace Backend.Controllers.API
                         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                         new Claim(JwtRegisteredClaimNames.Email, user.Email)
                     };
+
+                    // Adiciona o utilizadorId como claim
+                    if (utilizador != null)
+                    {
+                        claims.Add(new Claim("utilizadorId", utilizador.IdUtilizador.ToString()));
+                    }
 
                     // Adiciona as roles como claims
                     foreach (var role in roles)
@@ -179,16 +189,13 @@ namespace Backend.Controllers.API
             // Faz a busca dos utilizadores, cujo a sua função é "Docente"
             var docentes = await _context.Utilizadores
                 .Where(u => u.Funcao == "Docente")
-                .Include(u => u.Escola)
                 .Select(u => new UtilizadorDTO
                 {
                     IdUtilizador = u.IdUtilizador,
                     Nome = u.Nome,
                     Email = u.Email,
                     Funcao = u.Funcao,
-                    Categoria = u.Categoria,
-                    EscolaFK = u.EscolaFK,
-                    EscolaNome = u.Escola != null ? u.Escola.Nome : null
+                    Categoria = u.Categoria
                 })
                 .OrderBy(u => u.Nome)
                 .ToListAsync();

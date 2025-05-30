@@ -1,5 +1,4 @@
-﻿@using Backend.Models
-@model IEnumerable<BlocoHorario>
+﻿@model IEnumerable<Backend.Models.BlocoHorario>
 
 @{
     ViewData["Title"] = "Index";
@@ -20,22 +19,19 @@
                 @Html.DisplayNameFor(model => model.HoraFim)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DiaSemana)
+                @Html.DisplayNameFor(model => model.Dia)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Professor)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Disciplina)
+                @Html.DisplayNameFor(model => model.UnidadeCurricular)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Sala)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Turma)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Tipologia)
             </th>
             <th></th>
         </tr>
@@ -50,22 +46,19 @@
                 @Html.DisplayFor(modelItem => item.HoraFim)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.DiaSemana)
+                @Html.DisplayFor(modelItem => item.Dia)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Professor.IdUtilizador)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Disciplina.IdDisciplina)
+                @Html.DisplayFor(modelItem => item.UnidadeCurricular.IdUC)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Sala.IdSala)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Turma.IdTurma)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Tipologia.IdDisciplina)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.IdBloco">Edit</a> |

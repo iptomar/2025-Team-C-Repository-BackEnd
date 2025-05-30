@@ -12,9 +12,9 @@ namespace Backend.Models
 
         public int Lugares { get; set; }
 
-        public string TipoSala { get; set; } = string.Empty;
+        public string TipoSala { get; set; } = string.Empty; // laboratório, sala de aula, auditório, etc.
 
-        public string Localizacao { get; set; } = string.Empty;
+        public string Localizacao { get; set; } = string.Empty; // Abrantes, Tomar, Mafra... (nome_2) 
 
         // FK para referenciar a escola à qual a sala pertence
         [ForeignKey(nameof(Escola))]

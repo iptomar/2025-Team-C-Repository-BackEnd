@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Backend_v02.Data.Migrations
+namespace Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -30,11 +30,8 @@ namespace Backend_v02.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdBloco"));
 
-                    b.Property<int>("DiaSemana")
-                        .HasColumnType("int");
-
-                    b.Property<int>("DisciplinaFK")
-                        .HasColumnType("int");
+                    b.Property<DateOnly>("Dia")
+                        .HasColumnType("date");
 
                     b.Property<TimeSpan>("HoraFim")
                         .HasColumnType("time");
@@ -48,40 +45,47 @@ namespace Backend_v02.Data.Migrations
                     b.Property<int>("SalaFK")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SalaIdSala")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TipologiaFK")
-                        .HasColumnType("int");
-
                     b.Property<int>("TurmaFK")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TurmaIdTurma")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UtilizadorIdUtilizador")
+                    b.Property<int>("UnidadeCurricularFK")
                         .HasColumnType("int");
 
                     b.HasKey("IdBloco");
-
-                    b.HasIndex("DisciplinaFK");
 
                     b.HasIndex("ProfessorFK");
 
                     b.HasIndex("SalaFK");
 
-                    b.HasIndex("SalaIdSala");
-
-                    b.HasIndex("TipologiaFK");
-
                     b.HasIndex("TurmaFK");
 
-                    b.HasIndex("TurmaIdTurma");
-
-                    b.HasIndex("UtilizadorIdUtilizador");
+                    b.HasIndex("UnidadeCurricularFK");
 
                     b.ToTable("BlocosHorario");
+                });
+
+            modelBuilder.Entity("Backend.Models.Curso", b =>
+                {
+                    b.Property<int>("IdCurso")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCurso"));
+
+                    b.Property<int>("EscolaFK")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Grau")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Nome")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdCurso");
+
+                    b.HasIndex("EscolaFK");
+
+                    b.ToTable("Cursos");
                 });
 
             modelBuilder.Entity("Backend.Models.Escola", b =>
@@ -141,7 +145,7 @@ namespace Backend_v02.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdTurma"));
 
-                    b.Property<int>("DisciplinaFK")
+                    b.Property<int>("CursoFK")
                         .HasColumnType("int");
 
                     b.Property<string>("Nome")
@@ -149,35 +153,43 @@ namespace Backend_v02.Data.Migrations
 
                     b.HasKey("IdTurma");
 
-                    b.HasIndex("DisciplinaFK");
+                    b.HasIndex("CursoFK");
 
                     b.ToTable("Turmas");
                 });
 
             modelBuilder.Entity("Backend.Models.UC", b =>
                 {
-                    b.Property<int>("IdDisciplina")
+                    b.Property<int>("IdUC")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdDisciplina"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdUC"));
+
+                    b.Property<int?>("Ano")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CursoFK")
+                        .HasColumnType("int");
 
                     b.Property<string>("GrauAcademico")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("NomeDisciplina")
+                    b.Property<string>("NomeUC")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Semestre")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TipoDisciplina")
+                    b.Property<string>("TipoUC")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Tipologia")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("IdDisciplina");
+                    b.HasKey("IdUC");
+
+                    b.HasIndex("CursoFK");
 
                     b.ToTable("UCs");
                 });
@@ -199,7 +211,7 @@ namespace Backend_v02.Data.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("EscolaFK")
+                    b.Property<int?>("EscolaIdEscola")
                         .HasColumnType("int");
 
                     b.Property<string>("Funcao")
@@ -213,24 +225,9 @@ namespace Backend_v02.Data.Migrations
 
                     b.HasKey("IdUtilizador");
 
-                    b.HasIndex("EscolaFK");
+                    b.HasIndex("EscolaIdEscola");
 
                     b.ToTable("Utilizadores");
-                });
-
-            modelBuilder.Entity("EscolaUtilizador", b =>
-                {
-                    b.Property<int>("EscolasOndeEnsinaIdEscola")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MembrosComissaoHorariosIdUtilizador")
-                        .HasColumnType("int");
-
-                    b.HasKey("EscolasOndeEnsinaIdEscola", "MembrosComissaoHorariosIdUtilizador");
-
-                    b.HasIndex("MembrosComissaoHorariosIdUtilizador");
-
-                    b.ToTable("EscolaUtilizadorComissao", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -437,72 +434,63 @@ namespace Backend_v02.Data.Migrations
 
             modelBuilder.Entity("UCUtilizador", b =>
                 {
-                    b.Property<int>("DisciplinasLecionadasIdDisciplina")
-                        .HasColumnType("int");
-
                     b.Property<int>("DocentesIdUtilizador")
                         .HasColumnType("int");
 
-                    b.HasKey("DisciplinasLecionadasIdDisciplina", "DocentesIdUtilizador");
+                    b.Property<int>("UCsLecionadasIdUC")
+                        .HasColumnType("int");
 
-                    b.HasIndex("DocentesIdUtilizador");
+                    b.HasKey("DocentesIdUtilizador", "UCsLecionadasIdUC");
 
-                    b.ToTable("UCDocentes", (string)null);
+                    b.HasIndex("UCsLecionadasIdUC");
+
+                    b.ToTable("UCUtilizador");
                 });
 
             modelBuilder.Entity("Backend.Models.BlocoHorario", b =>
                 {
-                    b.HasOne("Backend.Models.UC", "Disciplina")
-                        .WithMany()
-                        .HasForeignKey("DisciplinaFK")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Backend.Models.Utilizador", "Professor")
-                        .WithMany()
+                        .WithMany("BlocosHorario")
                         .HasForeignKey("ProfessorFK")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Backend.Models.Sala", "Sala")
-                        .WithMany()
+                        .WithMany("BlocosHorario")
                         .HasForeignKey("SalaFK")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Backend.Models.Sala", null)
-                        .WithMany("BlocosHorario")
-                        .HasForeignKey("SalaIdSala");
-
-                    b.HasOne("Backend.Models.UC", "Tipologia")
-                        .WithMany()
-                        .HasForeignKey("TipologiaFK")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Backend.Models.Turma", "Turma")
-                        .WithMany()
+                        .WithMany("BlocosHorario")
                         .HasForeignKey("TurmaFK")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Backend.Models.Turma", null)
-                        .WithMany("BlocosHorario")
-                        .HasForeignKey("TurmaIdTurma");
-
-                    b.HasOne("Backend.Models.Utilizador", null)
-                        .WithMany("BlocosHorario")
-                        .HasForeignKey("UtilizadorIdUtilizador");
-
-                    b.Navigation("Disciplina");
+                    b.HasOne("Backend.Models.UC", "UnidadeCurricular")
+                        .WithMany()
+                        .HasForeignKey("UnidadeCurricularFK")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Professor");
 
                     b.Navigation("Sala");
 
-                    b.Navigation("Tipologia");
-
                     b.Navigation("Turma");
+
+                    b.Navigation("UnidadeCurricular");
+                });
+
+            modelBuilder.Entity("Backend.Models.Curso", b =>
+                {
+                    b.HasOne("Backend.Models.Escola", "Escola")
+                        .WithMany()
+                        .HasForeignKey("EscolaFK")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Escola");
                 });
 
             modelBuilder.Entity("Backend.Models.Sala", b =>
@@ -518,38 +506,31 @@ namespace Backend_v02.Data.Migrations
 
             modelBuilder.Entity("Backend.Models.Turma", b =>
                 {
-                    b.HasOne("Backend.Models.UC", "Disciplina")
-                        .WithMany("Turmas")
-                        .HasForeignKey("DisciplinaFK")
+                    b.HasOne("Backend.Models.Curso", "Curso")
+                        .WithMany()
+                        .HasForeignKey("CursoFK")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Curso");
+                });
+
+            modelBuilder.Entity("Backend.Models.UC", b =>
+                {
+                    b.HasOne("Backend.Models.Curso", "Curso")
+                        .WithMany("UnidadesCurriculares")
+                        .HasForeignKey("CursoFK")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Disciplina");
+                    b.Navigation("Curso");
                 });
 
             modelBuilder.Entity("Backend.Models.Utilizador", b =>
                 {
-                    b.HasOne("Backend.Models.Escola", "Escola")
-                        .WithMany()
-                        .HasForeignKey("EscolaFK")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Escola");
-                });
-
-            modelBuilder.Entity("EscolaUtilizador", b =>
-                {
                     b.HasOne("Backend.Models.Escola", null)
-                        .WithMany()
-                        .HasForeignKey("EscolasOndeEnsinaIdEscola")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Backend.Models.Utilizador", null)
-                        .WithMany()
-                        .HasForeignKey("MembrosComissaoHorariosIdUtilizador")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithMany("Membros")
+                        .HasForeignKey("EscolaIdEscola");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -605,21 +586,28 @@ namespace Backend_v02.Data.Migrations
 
             modelBuilder.Entity("UCUtilizador", b =>
                 {
-                    b.HasOne("Backend.Models.UC", null)
-                        .WithMany()
-                        .HasForeignKey("DisciplinasLecionadasIdDisciplina")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Backend.Models.Utilizador", null)
                         .WithMany()
                         .HasForeignKey("DocentesIdUtilizador")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Backend.Models.UC", null)
+                        .WithMany()
+                        .HasForeignKey("UCsLecionadasIdUC")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Backend.Models.Curso", b =>
+                {
+                    b.Navigation("UnidadesCurriculares");
                 });
 
             modelBuilder.Entity("Backend.Models.Escola", b =>
                 {
+                    b.Navigation("Membros");
+
                     b.Navigation("Salas");
                 });
 
@@ -631,11 +619,6 @@ namespace Backend_v02.Data.Migrations
             modelBuilder.Entity("Backend.Models.Turma", b =>
                 {
                     b.Navigation("BlocosHorario");
-                });
-
-            modelBuilder.Entity("Backend.Models.UC", b =>
-                {
-                    b.Navigation("Turmas");
                 });
 
             modelBuilder.Entity("Backend.Models.Utilizador", b =>

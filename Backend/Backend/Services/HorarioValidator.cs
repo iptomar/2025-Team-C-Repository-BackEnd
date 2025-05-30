@@ -55,7 +55,7 @@ namespace Backend.Services
             // Procurar blocos que usam a mesma sala no mesmo dia
             var blocosMesmaSala = await _context.BlocosHorario
                 .Where(b => b.SalaFK == blocoHorario.SalaFK &&
-                            b.DiaSemana == blocoHorario.DiaSemana &&
+                            b.Dia == blocoHorario.Dia &&
                             (blocoId == null || b.IdBloco != blocoId))
                 .ToListAsync();
 
@@ -82,7 +82,7 @@ namespace Backend.Services
             // Procurar blocos que têm o mesmo professor no mesmo dia
             var blocosMesmoProfessor = await _context.BlocosHorario
                 .Where(b => b.ProfessorFK == blocoHorario.ProfessorFK &&
-                            b.DiaSemana == blocoHorario.DiaSemana &&
+                            b.Dia == blocoHorario.Dia &&
                             (blocoId == null || b.IdBloco != blocoId))
                 .ToListAsync();
 
@@ -109,7 +109,7 @@ namespace Backend.Services
             // Procurar todos os blocos do mesmo professor no mesmo dia
             var blocosDoProfessor = await _context.BlocosHorario
                 .Where(b => b.ProfessorFK == blocoHorario.ProfessorFK &&
-                            b.DiaSemana == blocoHorario.DiaSemana)
+                            b.Dia == blocoHorario.Dia)
                 .OrderBy(b => b.HoraInicio)
                 .ToListAsync();
 

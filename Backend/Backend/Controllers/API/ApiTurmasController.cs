@@ -25,13 +25,13 @@ namespace Backend.Controllers.API
         public async Task<ActionResult<IEnumerable<TurmaDTO>>> GetTurmas()
         {
             var turmas = await _context.Turmas
-                .Include(t => t.Disciplina)
+                .Include(t => t.Curso)
                 .Select(t => new TurmaDTO
                 {
                     IdTurma = t.IdTurma,
                     Nome = t.Nome,
-                    DisciplinaFK = t.DisciplinaFK,
-                    DisciplinaNome = t.Disciplina.NomeDisciplina
+                    CursoFK = t.CursoFK,
+                    CursoNome = t.Curso.Nome
                 })
                 .ToListAsync();
 
@@ -39,21 +39,21 @@ namespace Backend.Controllers.API
         }
 
         /// <summary>
-        /// Retorna todas as turmas de uma disciplina específica.
+        /// Retorna todas as turmas de um curso específico.
         /// </summary>
         [HttpGet]
-        [Route("GetByDisciplina/{disciplinaId}")]
-        public async Task<ActionResult<IEnumerable<TurmaDTO>>> GetTurmasByDisciplina(int disciplinaId)
+        [Route("GetByCurso/{cursoId}")]
+        public async Task<ActionResult<IEnumerable<TurmaDTO>>> GetTurmasByCurso(int cursoId)
         {
             var turmas = await _context.Turmas
-                .Where(t => t.DisciplinaFK == disciplinaId)
-                .Include(t => t.Disciplina)
+                .Where(t => t.CursoFK == cursoId)
+                .Include(t => t.Curso)
                 .Select(t => new TurmaDTO
                 {
                     IdTurma = t.IdTurma,
                     Nome = t.Nome,
-                    DisciplinaFK = t.DisciplinaFK,
-                    DisciplinaNome = t.Disciplina.NomeDisciplina
+                    CursoFK = t.CursoFK,
+                    CursoNome = t.Curso.Nome
                 })
                 .ToListAsync();
 
@@ -68,7 +68,7 @@ namespace Backend.Controllers.API
         public async Task<ActionResult<TurmaDTO>> GetById(int id)
         {
             var turma = await _context.Turmas
-                .Include(t => t.Disciplina)
+                .Include(t => t.Curso)
                 .Include(t => t.BlocosHorario)
                 .FirstOrDefaultAsync(t => t.IdTurma == id);
 
@@ -79,8 +79,8 @@ namespace Backend.Controllers.API
             {
                 IdTurma = turma.IdTurma,
                 Nome = turma.Nome,
-                DisciplinaFK = turma.DisciplinaFK,
-                DisciplinaNome = turma.Disciplina?.NomeDisciplina
+                CursoFK = turma.CursoFK,
+                CursoNome = turma.Curso?.Nome
             };
 
             return Ok(turmaDTO);
@@ -93,16 +93,16 @@ namespace Backend.Controllers.API
         [Route("Create")]
         public async Task<ActionResult<TurmaDTO>> Create([FromBody] TurmaDTO turmaDTO)
         {
-            // Verificar se a disciplina existe
-            var disciplina = await _context.UCs.FindAsync(turmaDTO.DisciplinaFK);
-            if (disciplina == null)
-                return BadRequest(new { message = "Disciplina não encontrada" });
+            // Verificar se o curso existe
+            var curso = await _context.Cursos.FindAsync(turmaDTO.CursoFK);
+            if (curso == null)
+                return BadRequest(new { message = "Curso não encontrado" });
 
             // Criar uma nova turma com os dados do DTO
             var turma = new Turma
             {
                 Nome = turmaDTO.Nome,
-                DisciplinaFK = turmaDTO.DisciplinaFK
+                CursoFK = turmaDTO.CursoFK
             };
 
             _context.Turmas.Add(turma);
@@ -110,7 +110,7 @@ namespace Backend.Controllers.API
 
             // Atualizar o DTO com o ID gerado
             turmaDTO.IdTurma = turma.IdTurma;
-            turmaDTO.DisciplinaNome = disciplina.NomeDisciplina;
+            turmaDTO.CursoNome = curso.Nome;
 
             return CreatedAtAction(nameof(GetById), new { id = turma.IdTurma }, turmaDTO);
         }
@@ -125,10 +125,10 @@ namespace Backend.Controllers.API
             if (id != turmaDTO.IdTurma)
                 return BadRequest();
 
-            // Verificar se a disciplina existe
-            var disciplina = await _context.UCs.FindAsync(turmaDTO.DisciplinaFK);
-            if (disciplina == null)
-                return BadRequest(new { message = "Disciplina não encontrada" });
+            // Verificar se o curso existe
+            var curso = await _context.Cursos.FindAsync(turmaDTO.CursoFK);
+            if (curso == null)
+                return BadRequest(new { message = "Curso não encontrado" });
 
             // Obter a turma existente
             var turma = await _context.Turmas.FindAsync(id);
@@ -137,7 +137,7 @@ namespace Backend.Controllers.API
 
             // Atualizar os dados da turma
             turma.Nome = turmaDTO.Nome;
-            turma.DisciplinaFK = turmaDTO.DisciplinaFK;
+            turma.CursoFK = turmaDTO.CursoFK;
 
             try
             {
@@ -177,6 +177,5 @@ namespace Backend.Controllers.API
 
             return NoContent();
         }
-
     }
 }

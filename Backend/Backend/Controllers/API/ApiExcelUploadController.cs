@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers.API
 {
@@ -10,6 +11,7 @@ namespace Backend.Controllers.API
         /// Recebe dados de folhas Excel e processa-os.
         /// </summary>
         /// <param name="sheetsData">Dicionário com o nome da folha como chave e os dados como valor.</param>
+        [Authorize(Roles = "Administrador,MembroComissao")]
         [HttpPost]
         [Route("Upload")]
         public async Task<IActionResult> Upload([FromBody] Dictionary<string, object> sheetsData)

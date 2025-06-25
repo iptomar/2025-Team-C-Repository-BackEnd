@@ -28,7 +28,7 @@ namespace Backend.Data
             await CriarRolesAsync(roleManager);
 
             // Criar utilizadores de teste
-            await CriarUtilizadoresTesteAsync(context, userManager);
+            //await CriarUtilizadoresTesteAsync(context, userManager);
 
             // Criar escolas
             var escolas = CriarEscolas();
@@ -41,27 +41,27 @@ namespace Backend.Data
             await context.SaveChangesAsync();
 
             // Criar cursos
-            var cursos = CriarCursos(escolas);
-            await context.Cursos.AddRangeAsync(cursos);
-            await context.SaveChangesAsync();
+            //var cursos = CriarCursos(escolas);
+            //await context.Cursos.AddRangeAsync(cursos);
+            //await context.SaveChangesAsync();
 
             // Criar UCs
-            var ucs = CriarUCs(cursos);
-            await context.UCs.AddRangeAsync(ucs);
-            await context.SaveChangesAsync();
+            //var ucs = CriarUCs(cursos);
+            //await context.UCs.AddRangeAsync(ucs);
+            //await context.SaveChangesAsync();
 
             // Atribuir UCs aos docentes
-            await AtribuirUCsAosDocentesAsync(context, ucs);
+            //await AtribuirUCsAosDocentesAsync(context, ucs);
 
             // Criar turmas
-            var turmas = CriarTurmas(cursos);
-            await context.Turmas.AddRangeAsync(turmas);
-            await context.SaveChangesAsync();
+            //var turmas = CriarTurmas(cursos);
+            //await context.Turmas.AddRangeAsync(turmas);
+            //await context.SaveChangesAsync();
 
             // Criar blocos de horário
-            var blocos = CriarBlocosHorario(context);
-            await context.BlocosHorario.AddRangeAsync(blocos);
-            await context.SaveChangesAsync();
+            //var blocos = CriarBlocosHorario(context);
+            //await context.BlocosHorario.AddRangeAsync(blocos);
+            //await context.SaveChangesAsync();
         }
 
         /// <summary>
@@ -163,9 +163,9 @@ namespace Backend.Data
         {
             return new List<Escola>
             {
-                new Escola { Nome = "Escola Superior de Tecnologia de Tomar", Localizacao = "Tomar" },
+                new Escola { Nome = "Escola Superior de Tecnologia de Abrantes", Localizacao = "Abrantes" },
                 new Escola { Nome = "Escola Superior de Gestão de Tomar", Localizacao = "Tomar" },
-                new Escola { Nome = "Escola Superior de Tecnologia de Abrantes", Localizacao = "Abrantes" }
+                new Escola { Nome = "Escola Superior de Tecnologia de Tomar", Localizacao = "Tomar" }
             };
         }
 

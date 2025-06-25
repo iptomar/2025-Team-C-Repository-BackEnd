@@ -146,7 +146,7 @@ namespace Backend.Controllers.API
                             curso = new Curso
                             {
                                 Nome = nomeCurso,
-                                EscolaFK = 1 // ⚠️ Valor temporário – atualizar com lógica correta para associar escola
+                                EscolaFK = 1
                             };
                             _context.Cursos.Add(curso);
                             await _context.SaveChangesAsync();
@@ -195,7 +195,7 @@ namespace Backend.Controllers.API
 
                         var nomeSala = row[2]?.ToString()?.Trim();
                         var lugares = row[7]?.ToString()?.Trim();
-                        var tipo = row[4]?.ToString()?.Trim();
+                        var tipo = row[1]?.ToString()?.Trim();
                         var localizacao = row[12]?.ToString()?.Trim();
                         int.TryParse(row[11]?.ToString(), out int localizacao_esc);
 

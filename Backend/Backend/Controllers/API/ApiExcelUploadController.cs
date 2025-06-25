@@ -1,4 +1,3 @@
-<<<<<<< continuação_ExcelAPI
 ﻿using Backend.Models;
 using Backend.Data;
 using Newtonsoft.Json.Linq;
@@ -6,10 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using Microsoft.AspNetCore.Identity;
-=======
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
->>>>>>> main
 
 namespace Backend.Controllers.API
 {
@@ -17,7 +14,6 @@ namespace Backend.Controllers.API
     [ApiController]
     public class ApiExcelUploadController : ControllerBase
     {
-<<<<<<< continuação_ExcelAPI
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
 
@@ -27,13 +23,11 @@ namespace Backend.Controllers.API
             _userManager = userManager;
         }
 
-=======
         /// <summary>
         /// Recebe dados de folhas Excel e processa-os.
         /// </summary>
         /// <param name="sheetsData">Dicionário com o nome da folha como chave e os dados como valor.</param>
         [Authorize(Roles = "Administrador,MembroComissao")]
->>>>>>> main
         [HttpPost]
         [Route("Upload")]
         public async Task<IActionResult> Upload([FromBody] Dictionary<string, object> sheetsData)

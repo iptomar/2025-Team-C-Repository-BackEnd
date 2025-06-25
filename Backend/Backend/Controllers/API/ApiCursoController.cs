@@ -1,6 +1,7 @@
 ﻿using Backend.Data;
 using Backend.DTO;
 using Backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,6 +21,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Retorna todos os cursos.
         /// </summary>
+        [Authorize]
         [HttpGet]
         [Route("GetAll")]
         public async Task<ActionResult<IEnumerable<CursoDTO>>> GetCursos()
@@ -42,6 +44,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Retorna um curso pelo ID.
         /// </summary>
+        [Authorize]
         [HttpGet]
         [Route("GetById/{id}")]
         public async Task<ActionResult<CursoDTO>> GetById(int id)
@@ -68,6 +71,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Cria um novo curso.
         /// </summary>
+        [Authorize(Roles = "Administrador,MembroComissao")]
         [HttpPost]
         [Route("Create")]
         public async Task<ActionResult<CursoDTO>> Create([FromBody] CursoDTO cursoDTO)
@@ -95,6 +99,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Atualiza um curso existente.
         /// </summary>
+        [Authorize(Roles = "Administrador,MembroComissao")]
         [HttpPut]
         [Route("Update/{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] CursoDTO cursoDTO)
@@ -132,6 +137,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Remove um curso pelo ID.
         /// </summary>
+        [Authorize(Roles = "Administrador,MembroComissao")]
         [HttpDelete]
         [Route("Delete/{id}")]
         public async Task<IActionResult> Delete(int id)

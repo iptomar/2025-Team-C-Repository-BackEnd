@@ -1,6 +1,7 @@
 ﻿using Backend.Data;
 using Backend.DTO;
 using Backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,6 +21,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Retorna todas as salas.
         /// </summary>
+        [Authorize]
         [HttpGet]
         [Route("GetAll")]
         public async Task<ActionResult<IEnumerable<SalaDTO>>> GetSalas()
@@ -44,6 +46,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Retorna todas as salas de uma escola específica.
         /// </summary>
+        [Authorize]
         [HttpGet]
         [Route("GetByEscola/{escolaId}")]
         public async Task<ActionResult<IEnumerable<SalaDTO>>> GetSalasByEscola(int escolaId)
@@ -69,6 +72,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Retorna uma sala pelo ID.
         /// </summary>
+        [Authorize]
         [HttpGet]
         [Route("GetById/{id}")]
         public async Task<ActionResult<SalaDTO>> GetById(int id)
@@ -97,6 +101,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Cria uma nova sala.
         /// </summary>
+        [Authorize(Roles = "Administrador")]
         [HttpPost]
         [Route("Create")]
         public async Task<ActionResult<SalaDTO>> Create([FromBody] SalaDTO salaDTO)
@@ -126,6 +131,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Atualiza uma sala existente.
         /// </summary>
+        [Authorize(Roles = "Administrador,MembroComissao")]
         [HttpPut]
         [Route("Update/{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] SalaDTO salaDTO)
@@ -165,6 +171,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Remove uma sala pelo ID.
         /// </summary>
+        [Authorize(Roles = "Administrador")]
         [HttpDelete]
         [Route("Delete/{id}")]
         public async Task<IActionResult> Delete(int id)

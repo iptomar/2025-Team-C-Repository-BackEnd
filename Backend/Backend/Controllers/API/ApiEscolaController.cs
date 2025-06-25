@@ -1,6 +1,7 @@
 ﻿using Backend.Data;
 using Backend.DTO;
 using Backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,6 +21,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Retorna todas as escolas.
         /// </summary>
+        [Authorize]
         [HttpGet]
         [Route("GetAllEscolas")]
         public async Task<ActionResult<IEnumerable<EscolaDTO>>> GetEscolas()
@@ -39,6 +41,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Retorna uma escola pelo ID.
         /// </summary>
+        [Authorize]
         [HttpGet]
         [Route("GetById/{id}")]
         public async Task<ActionResult<EscolaDTO>> GetById(int id)
@@ -64,6 +67,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Cria uma nova escola.
         /// </summary>
+        [Authorize(Roles = "Administrador")]
         [HttpPost]
         [Route("Create")]
         public async Task<ActionResult<EscolaDTO>> Create([FromBody] EscolaDTO escolaDTO)
@@ -85,6 +89,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Atualiza uma escola existente.
         /// </summary>
+        [Authorize(Roles = "Administrador,MembroComissao")]
         [HttpPut]
         [Route("Update/{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] EscolaDTO escolaDTO)
@@ -117,6 +122,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Remove uma escola pelo ID.
         /// </summary>
+        [Authorize(Roles = "Administrador")]
         [HttpDelete]
         [Route("Delete/{id}")]
         public async Task<IActionResult> Delete(int id)

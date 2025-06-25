@@ -1,6 +1,7 @@
 ﻿using Backend.Data;
 using Backend.DTO;
 using Backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,6 +21,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Retorna todas as turmas.
         /// </summary>
+        [Authorize]
         [HttpGet]
         [Route("GetAll")]
         public async Task<ActionResult<IEnumerable<TurmaDTO>>> GetTurmas()
@@ -41,6 +43,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Retorna todas as turmas de um curso específico.
         /// </summary>
+        [Authorize]
         [HttpGet]
         [Route("GetByCurso/{cursoId}")]
         public async Task<ActionResult<IEnumerable<TurmaDTO>>> GetTurmasByCurso(int cursoId)
@@ -63,6 +66,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Retorna uma turma pelo ID.
         /// </summary>
+        [Authorize]
         [HttpGet]
         [Route("GetById/{id}")]
         public async Task<ActionResult<TurmaDTO>> GetById(int id)
@@ -89,6 +93,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Cria uma nova turma.
         /// </summary>
+        [Authorize(Roles = "Administrador,MembroComissao")]
         [HttpPost]
         [Route("Create")]
         public async Task<ActionResult<TurmaDTO>> Create([FromBody] TurmaDTO turmaDTO)
@@ -118,6 +123,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Atualiza uma turma existente.
         /// </summary>
+        [Authorize(Roles = "Administrador,MembroComissao")]
         [HttpPut]
         [Route("Update/{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] TurmaDTO turmaDTO)
@@ -157,6 +163,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Remove uma turma pelo ID.
         /// </summary>
+        [Authorize(Roles = "Administrador,MembroComissao")]
         [HttpDelete]
         [Route("Delete/{id}")]
         public async Task<IActionResult> Delete(int id)

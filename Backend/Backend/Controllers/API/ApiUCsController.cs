@@ -1,6 +1,7 @@
 ﻿using Backend.Data;
 using Backend.DTO;
 using Backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,6 +21,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Retorna todas as unidades curriculares (disciplinas).
         /// </summary>
+        [Authorize]
         [HttpGet]
         [Route("GetAll")]
         public async Task<ActionResult<IEnumerable<UCDTO>>> GetAllUCs()
@@ -44,6 +46,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Retorna uma unidade curricular pelo ID.
         /// </summary>
+        [Authorize]
         [HttpGet]
         [Route("GetById/{id}")]
         public async Task<ActionResult<UCDTO>> GetById(int id)
@@ -72,6 +75,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Cria uma nova unidade curricular.
         /// </summary>
+        [Authorize(Roles = "Administrador,MembroComissao")]
         [HttpPost]
         [Route("Create")]
         public async Task<ActionResult<UCDTO>> Create([FromBody] UCDTO ucDTO)
@@ -98,6 +102,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Atualiza uma unidade curricular existente.
         /// </summary>
+        [Authorize(Roles = "Administrador,MembroComissao")]
         [HttpPut]
         [Route("Update/{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UCDTO ucDTO)
@@ -135,6 +140,7 @@ namespace Backend.Controllers.API
         /// <summary>
         /// Remove uma unidade curricular pelo ID.
         /// </summary>
+        [Authorize(Roles = "Administrador,MembroComissao")]
         [HttpDelete]
         [Route("Delete/{id}")]
         public async Task<IActionResult> Delete(int id)

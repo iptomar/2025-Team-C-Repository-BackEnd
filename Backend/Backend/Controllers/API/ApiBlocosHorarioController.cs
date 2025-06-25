@@ -3,6 +3,7 @@ using Backend.DTO;
 using Backend.Hubs;
 using Backend.Models;
 using Backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +43,7 @@ namespace Backend.Controllers.API
         /// Retorna todos os blocos de horário.
         /// </summary>
         /// <returns></returns>
+        [Authorize]
         [HttpGet]
         [Route("getAll")]
         public async Task<ActionResult<IEnumerable<BlocoHorarioDTO>>> GetAll()
@@ -76,6 +78,7 @@ namespace Backend.Controllers.API
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        [Authorize]
         [HttpGet]
         [Route("getById/{id}")]
         public async Task<ActionResult<BlocoHorarioDTO>> GetById(int id)
@@ -113,6 +116,7 @@ namespace Backend.Controllers.API
         /// </summary>
         /// <param name="blocoDTO">DTO com os dados do bloco horário</param>
         /// <returns></returns>
+        [Authorize(Roles = "Administrador,MembroComissao")]
         [HttpPost]
         [Route("create")]
         public async Task<IActionResult> Create([FromBody] BlocoHorarioDTO blocoDTO)
@@ -172,6 +176,7 @@ namespace Backend.Controllers.API
         /// <param name="id"></param>
         /// <param name="blocoDTO"></param>
         /// <returns></returns>
+        [Authorize(Roles = "Administrador,MembroComissao")]
         [HttpPut]
         [Route("update/{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] BlocoHorarioDTO blocoDTO)
@@ -244,6 +249,7 @@ namespace Backend.Controllers.API
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        [Authorize(Roles = "Administrador,MembroComissao")]
         [HttpDelete]
         [Route("delete/{id}")]
         public async Task<IActionResult> Delete(int id)

@@ -1,6 +1,7 @@
 ﻿using Backend.Data;
 using Backend.DTO;
 using Backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -50,6 +51,7 @@ namespace Backend.Controllers.API
             _config = config;
         }
 
+        [Authorize(Roles = "Administrador")]
         [HttpPost]
         [Route("createUser")]
         public async Task<ActionResult<IdentityUser>> CreateUser([FromQuery] string role, [FromQuery] string email, [FromQuery] string password, [FromQuery] string nome)
@@ -182,6 +184,7 @@ namespace Backend.Controllers.API
         /// Retorna todos os utilizadores com função de Docente.
         /// </summary>
         /// <returns>Lista de docentes</returns>
+        [Authorize]
         [HttpGet]
         [Route("GetDocentes")]
         public async Task<ActionResult<IEnumerable<UtilizadorDTO>>> GetDocentes()

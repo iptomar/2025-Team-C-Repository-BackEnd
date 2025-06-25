@@ -31,14 +31,14 @@ namespace Backend.Data
             //await CriarUtilizadoresTesteAsync(context, userManager);
 
             // Criar escolas
-            //var escolas = CriarEscolas();
-            //await context.Escolas.AddRangeAsync(escolas);
-            //await context.SaveChangesAsync();
+            var escolas = CriarEscolas();
+            await context.Escolas.AddRangeAsync(escolas);
+            await context.SaveChangesAsync();
 
             // Criar salas
-            //var salas = CriarSalas(escolas);
-            //await context.Salas.AddRangeAsync(salas);
-            //await context.SaveChangesAsync();
+            var salas = CriarSalas(escolas);
+            await context.Salas.AddRangeAsync(salas);
+            await context.SaveChangesAsync();
 
             // Criar cursos
             //var cursos = CriarCursos(escolas);
@@ -163,9 +163,9 @@ namespace Backend.Data
         {
             return new List<Escola>
             {
-                new Escola { Nome = "Escola Superior de Tecnologia de Tomar", Localizacao = "Tomar" },
+                new Escola { Nome = "Escola Superior de Tecnologia de Abrantes", Localizacao = "Abrantes" },
                 new Escola { Nome = "Escola Superior de Gestão de Tomar", Localizacao = "Tomar" },
-                new Escola { Nome = "Escola Superior de Tecnologia de Abrantes", Localizacao = "Abrantes" }
+                new Escola { Nome = "Escola Superior de Tecnologia de Tomar", Localizacao = "Tomar" }
             };
         }
 

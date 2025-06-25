@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using Microsoft.AspNetCore.Identity;
 
 namespace Backend.Controllers.API
 {
@@ -12,10 +13,12 @@ namespace Backend.Controllers.API
     public class ApiExcelUploadController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public ApiExcelUploadController(ApplicationDbContext context)
+        public ApiExcelUploadController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         [HttpPost]
@@ -69,12 +72,31 @@ namespace Backend.Controllers.API
                     continue;
                 }
 
+                // Verifica se já existe no Identity
+                var identityUser = await _userManager.FindByEmailAsync(email);
+                if (identityUser == null)
+                {
+                    identityUser = new IdentityUser
+                    {
+                        UserName = email,
+                        Email = email,
+                        EmailConfirmed = true
+                    };
+                    var result = await _userManager.CreateAsync(identityUser, "123Qwe#");
+                    if (!result.Succeeded)
+                    {
+                        docentesIgnorados.Add($"Linha {i + 1}: Erro ao criar utilizador Identity: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                        continue;
+                    }
+                    await _userManager.AddToRoleAsync(identityUser, "Docente");
+                }
+
                 var utilizador = new Utilizador
                 {
                     Nome = nome,
                     Email = email,
                     Funcao = "Docente",
-                    UserId = ""
+                    UserId = identityUser.Id
                 };
 
                 await _context.Utilizadores.AddAsync(utilizador);

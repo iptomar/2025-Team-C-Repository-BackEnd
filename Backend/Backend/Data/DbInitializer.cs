@@ -28,12 +28,18 @@ namespace Backend.Data
             await CriarRolesAsync(roleManager);
 
             // Criar utilizadores de teste
-            //await CriarUtilizadoresTesteAsync(context, userManager);
+            await CriarUtilizadoresTesteAsync(context, userManager);
 
-            // Criar escolas
-            var escolas = CriarEscolas();
-            await context.Escolas.AddRangeAsync(escolas);
-            await context.SaveChangesAsync();
+            // Criar escolas se não existirem
+            var escolasExistentes = context.Escolas.ToList();
+            var escolasParaAdicionar = CriarEscolas()
+                .Where(e => !escolasExistentes.Any(ee => ee.Nome == e.Nome && ee.Localizacao == e.Localizacao))
+                .ToList();
+
+            await context.Escolas.AddRangeAsync(escolasParaAdicionar);
+            await context.SaveChangesAsync();    
+            
+            var escolas = context.Escolas.ToList();
 
             // Criar salas
             var salas = CriarSalas(escolas);
